@@ -1,44 +1,37 @@
-//Server
 document.addEventListener('DOMContentLoaded', () => {
-    const socket = io.connect('http://' + document.domain + ':' + location.port);
+    var socket = io();
 
-    socket.on("connect", () =>{
-        console.log("connected");
-    })
-});
-
-//Canvas
-window.addEventListener("load", () => {
-    
     const canvas = document.querySelector('canvas');
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
 
-    canvas.height = window.innerHeight
-    canvas.width = window.innerWidth
-    
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
     let drawing = false;
-    
-    function startPosition(e){
+    let lastX = 0;
+    let lastY = 0;
+
+    function startPosition(e) {
         drawing = true;
         draw(e);
     }
-    
-    function finishedPosition(){
+
+    function finishedPosition() {
         drawing = false;
         ctx.beginPath();
     }
-    
-    function draw(e){
-        if(!drawing) return;
+
+    function draw(e) {
+        if (!drawing) return;
         ctx.lineWidth = 10;
-        ctx.lineCap = "round";
-    
+        ctx.lineCap = 'round';
+
         ctx.lineTo(e.clientX, e.clientY);
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(e.clientX, e.clientY);
-    
-        socket.emit("draw", { x: e.clientX, y: e.clientY });
+
+        socket.emit('draw', { x: e.clientX, y: e.clientY });
     }
 
     socket.on('draw', ({ x, y }) => {
@@ -58,5 +51,4 @@ window.addEventListener("load", () => {
         ctx.stroke();
         ctx.closePath();
     }
-
 });
