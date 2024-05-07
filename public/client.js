@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    var socket = io();
+    var socket;
+
+    socket = io.connect('http://127.0.0.1:3000');
 
     const canvas = document.querySelector('canvas');
     const ctx = canvas.getContext('2d');
@@ -31,7 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.beginPath();
         ctx.moveTo(e.clientX, e.clientY);
 
-        socket.emit('draw', { x: e.clientX, y: e.clientY });
+        var data = {
+            x: e.clientX,
+            y: e.clientY
+        }
+
+        socket.emit('draw', data);
     }
 
     socket.on('draw', ({ x, y }) => {
@@ -52,3 +59,4 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.closePath();
     }
 });
+

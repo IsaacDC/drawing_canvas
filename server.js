@@ -1,19 +1,23 @@
-const express = require('express');
-const http = require('http');
+const express = require("express");
 const app = express();
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = require('socket.io')(server)
+var server = app.listen(3000);
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
+app.use(express.static('public'));
 
-io.sockets.on('connection', (socket) => {
-	console.log('Client connected: ' + socket.id)
+console.log("Socket is running");
 
-	socket.on('mouse', (data) => socket.broadcast.emit('mouse', data))
+var socket = require('socket.io');
+var io = socket(server);
 
-	socket.on('disconnect', () => console.log('Client has disconnected'))
-})
+io.sockets.on('connection', newConnection);
 
+function newConnection(socket){
+    console.log('Connected: ' + socket.id);
+
+    socket.on('draw', drawing);
+
+    function drawing(data) {
+        socket.broadcast.emit('draw', data)
+        console.log(data);
+    }
+}
