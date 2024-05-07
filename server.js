@@ -18,6 +18,5 @@ function newConnection(socket){
 
     function drawing(data) {
         socket.broadcast.emit('draw', data)
-        console.log(data);
     }
 }
