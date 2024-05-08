@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", stopDrawing);
 
-  
+  const colorPicker = document.getElementById('strokeColor');
+
 
   function startDrawing(e) {
     isDrawing = true;
@@ -46,23 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // incoming socket events
   socket.on('loadDrawingData', (data) => {
-    data.forEach(event => {
-      if (event.type === 'start') {
-        ctx.beginPath();
-        ctx.moveTo(event.x, event.y);
-        isDrawing = true;
-        lastMouseX = event.x;
-        lastMouseY = event.y;
-      } else if (event.type === 'draw') {
-        ctx.lineTo(event.x, event.y);
-        ctx.stroke();
-        lastMouseX = event.x;
-        lastMouseY = event.y;
-      } else if (event.type === 'stop') {
-        isDrawing = false;
-        ctx.beginPath();
-      }
-    });
+    
   });
 
   socket.on("startDrawing", ({ x, y }) => {
