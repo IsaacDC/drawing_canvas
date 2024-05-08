@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 var server = app.listen(3000);
-
 app.use(express.static('public'));
 
 console.log("Socket is running");
@@ -9,14 +8,30 @@ console.log("Socket is running");
 var socket = require('socket.io');
 var io = socket(server);
 
-io.sockets.on('connection', newConnection);
+let connections = [];
 
-function newConnection(socket){
-    console.log('Connected: ' + socket.id);
+io.sockets.on('connection', (socket) => {
+    connections.push(socket);
+    console.log(`${socket.id} has connected`);
 
-    socket.on('draw', drawing);
+    socket.on('draw', (data) => {
+        connections.forEach(con =>{
+            if(con.id !== socket.id){
+                con.emit('ondraw', {x : data.x, y: data.y})
+            }
+        });
+    });
 
-    function drawing(data) {
-        socket.broadcast.emit('draw', data)
-    }
-}
+    socket.on('down', (data) =>{
+        connections.forEach(con => {
+            if(con.id !== socket.id){
+                con.emit('ondown', {x : data.x, y : data.y})
+            }
+        })
+    })
+
+    socket.on("disconnect", (reason) =>{
+        console.log(`${socket.id} has disconnected`);
+        connections = connections.filter((con) => con.id !== socket.id);
+    });
+});

@@ -1,59 +1,50 @@
-document.addEventListener('DOMContentLoaded', () => {
-    var socket;
+document.addEventListener("DOMContentLoaded", () => {
+  var socket;
+  socket = io.connect("http://127.0.0.1:3000");
 
-    socket = io.connect('http://127.0.0.1:3000');
-    socket.on('draw', newDrawing);
+  const canvas = document.querySelector("canvas");
+  const ctx = canvas.getContext("2d");
 
-    const canvas = document.querySelector('canvas');
-    const ctx = canvas.getContext('2d');
-
-    canvas.height = window.innerHeight;
+  const onResize = () => {
     canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
 
-    let drawing = false;
+  window.addEventListener("resize", onResize, false);
+  onResize();
 
-    function startPosition(e) {
-        drawing = true;
-        draw(e);
-    }
+  let drawing = false;
+  let x;
+  let y;
 
-    function finishedPosition() {
-        drawing = false;
-        ctx.beginPath();
-    }
+  canvas.addEventListener("mousedown", (e) => {
+    drawing = true;
+    ctx.moveTo(x, y);
+    socket.emit("down", {x , y });
+  });
 
-    function draw(e) {
-        if (!drawing) return;
-        ctx.lineWidth = 10;
-        ctx.lineCap = 'round';
+  canvas.addEventListener("mouseup", (e) => {
+    drawing = false;
+    
+  });
 
-        ctx.lineTo(e.clientX, e.clientY);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(e.clientX, e.clientY);
+  socket.on("ondraw", ({ x, y }) => {
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  });
 
-        var data = {
-            x: e.clientX,
-            y: e.clientY
-        }
+  socket.on("ondown", ({ x, y }) => {
+    ctx.moveTo(x, y);
+  });
 
-        socket.emit('draw', data);
-    }
+  canvas.addEventListener("mousemove", (e) => {
+    x = e.clientX;
+    y = e.clientY;
 
-    function newDrawing(data){
-        ctx.lineWidth = 10;
-        ctx.lineCap = 'round';
+    if (!drawing) return;
 
-        ctx.lineTo(data.x, data.y);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(data.x, data.y);
-
-        finishedPosition();
-    }
-
-    canvas.addEventListener('mousedown', startPosition);
-    canvas.addEventListener('mouseup', finishedPosition);
-    canvas.addEventListener('mousemove', draw);
+    socket.emit("draw", {x, y});
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  });
 });
-
