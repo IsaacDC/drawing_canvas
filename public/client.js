@@ -1,21 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
-  var socket;
-  socket = io.connect("http://127.0.0.1:3000");
-
+  const socket = io.connect("http://127.0.0.1:3000");
   const canvas = document.querySelector("canvas");
   const ctx = canvas.getContext("2d");
-
-  const onResize = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  };
-
-  window.addEventListener("resize", onResize, false);
-  onResize();
 
   let drawing = false;
   let x;
   let y;
+
+  const resizeCanvas = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
 
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
@@ -47,4 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.lineTo(x, y);
     ctx.stroke();
   });
+
+  resizeCanvas();
 });

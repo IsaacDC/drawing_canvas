@@ -1,12 +1,12 @@
 const express = require("express");
 const app = express();
 var server = app.listen(3000);
+const socket = require('socket.io');
+const io = socket(server);
+
 app.use(express.static('public'));
 
 console.log("Socket is running");
-
-var socket = require('socket.io');
-var io = socket(server);
 
 let connections = [];
 
