@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastMouseX = 0;
   let lastMouseY = 0;
   let color;
+  const clients = {};
 
   // mouse events
   canvas.addEventListener("mousedown", startDrawing);
@@ -21,6 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mouseup", stopDrawing);
 
   const colorPicker = document.getElementById('strokeColor');
+  colorPicker.addEventListener('input', () => {
+      color = colorPicker.value;
+      socket.emit('changeStrokeColor', color);
+  });
 
 
   function startDrawing(e) {
@@ -28,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     [lastMouseX, lastMouseY] = [e.offsetX, e.offsetY];
     ctx.beginPath();
     ctx.moveTo(lastMouseX, lastMouseY);
+    ctx.strokeStyle = color;
     socket.emit("startDrawing", { x: lastMouseX, y: lastMouseY });
   }
 
@@ -46,18 +52,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // incoming socket events
-  socket.on('loadDrawingData', (data) => {
-    
-  });
+  socket.on('loadDrawingData', ( drawingData, clients) => {
+    Object.assign(clients, clients);
+    drawingData.forEach(drawingPoint => {
+        if (drawingPoint.type === 'start') {
+            ctx.beginPath();
+            ctx.moveTo(drawingPoint.x, drawingPoint.y);
+            ctx.strokeStyle = drawingPoint.color;
+        } else if (drawingPoint.type === 'draw') {
+            ctx.lineTo(drawingPoint.x, drawingPoint.y);
+            ctx.strokeStyle = drawingPoint.color;
+            ctx.stroke();
+        } else if (drawingPoint.type === 'stop') {
+            ctx.beginPath();
+        }
+    });
+});
 
-  socket.on("startDrawing", ({ x, y }) => {
+  socket.on("startDrawing", ({ x, y, color }) => {
     ctx.beginPath();
     ctx.moveTo(x, y);
+    ctx.strokeStyle = color;
     isDrawing = true;
   });
 
-  socket.on("draw", ({ x, y }) => {
+  socket.on("draw", ({ x, y, color }) => {
     ctx.lineTo(x, y);
+    ctx.strokeStyle = color;
     ctx.stroke();
   });
 
@@ -65,6 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
     isDrawing = false;
     ctx.beginPath();
   });
+
+  socket.on('changeStrokeColor', ({ socketId, color }) => {
+    clients[socketId] = color;
+});
 
   resizeCanvas();
 
