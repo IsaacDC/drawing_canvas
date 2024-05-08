@@ -1,37 +1,33 @@
 const express = require("express");
 const app = express();
 var server = app.listen(3000);
-const socket = require('socket.io');
-const io = socket(server);
-
 app.use(express.static('public'));
 
 console.log("Socket is running");
 
-let connections = [];
+var socket = require('socket.io');
+var io = socket(server);
 
-io.sockets.on('connection', (socket) => {
-    connections.push(socket);
-    console.log(`${socket.id} has connected`);
+io.on('connection', (socket) => {
+  console.log('A user connected');
 
-    socket.on('draw', (data) => {
-        connections.forEach(con =>{
-            if(con.id !== socket.id){
-                con.emit('ondraw', {x : data.x, y: data.y})
-            }
-        });
-    });
+  // Handle start drawing event
+  socket.on('startDrawing', ({ x, y }) => {
+    socket.broadcast.emit('startDrawing', { x, y });
+  });
 
-    socket.on('down', (data) =>{
-        connections.forEach(con => {
-            if(con.id !== socket.id){
-                con.emit('ondown', {x : data.x, y : data.y})
-            }
-        })
-    })
+  // Handle drawing event
+  socket.on('draw', ({ x, y }) => {
+    socket.broadcast.emit('draw', { x, y });
+  });
 
-    socket.on("disconnect", (reason) =>{
-        console.log(`${socket.id} has disconnected`);
-        connections = connections.filter((con) => con.id !== socket.id);
-    });
+  // Handle stop drawing event
+  socket.on('stopDrawing', () => {
+    socket.broadcast.emit('stopDrawing');
+  });
+
+  // Handle disconnect event
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
 });
