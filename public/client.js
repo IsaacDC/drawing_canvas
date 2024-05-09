@@ -53,17 +53,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // incoming socket events
   socket.on('loadDrawingData', ( drawingData, clients) => {
-    Object.assign(clients, clients);
-    drawingData.forEach(drawingPoint => {
-        if (drawingPoint.type === 'start') {
+    drawingData.forEach((data) => {
+        if (data.type === 'start') {
             ctx.beginPath();
-            ctx.moveTo(drawingPoint.x, drawingPoint.y);
-            ctx.strokeStyle = drawingPoint.color;
-        } else if (drawingPoint.type === 'draw') {
-            ctx.lineTo(drawingPoint.x, drawingPoint.y);
-            ctx.strokeStyle = drawingPoint.color;
+            ctx.moveTo(data.x, data.y);
+            ctx.strokeStyle = data.color;
+        } else if (data.type === 'draw') {
+            ctx.lineTo(data.x, data.y);
+            ctx.strokeStyle = data.color;
             ctx.stroke();
-        } else if (drawingPoint.type === 'stop') {
+        } else if (data.type === 'stop') {
             ctx.beginPath();
         }
     });

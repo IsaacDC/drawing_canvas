@@ -4,35 +4,40 @@ var server = app.listen(3000);
 app.use(express.static('public'));
 console.log("Socket is running");
 
-var socket = require('socket.io');
-var io = socket(server);
+const socket = require('socket.io');
+const io = socket(server);
+const db = require('./db');
 
-var drawingData = [];
 const clients = {};
 
 io.on('connection', (socket) => {
     console.log('A user connected');
     clients[socket.id] = '#000000';
 
-    socket.emit('loadDrawingData', drawingData, clients);
+    db.getAllDrawingData((drawingData) => {
+        socket.emit('loadDrawingData', drawingData, clients);
+      });
 
     // start drawing event
     socket.on('startDrawing', ({ x, y }) => {
-        drawingData.push({ type: 'start', x, y, color: clients[socket.id] });
+        const data = { type: 'start', x, y, color: clients[socket.id] };
+        db.insertDrawingData(data);
         socket.broadcast.emit('startDrawing', { x, y, color: clients[socket.id] });
-    });
+      });
 
     // drawing event
     socket.on('draw', ({ x, y }) => {
-        drawingData.push({ type: 'draw', x, y, color: clients[socket.id] });
+        const data = { type: 'draw', x, y, color: clients[socket.id] };
+        db.insertDrawingData(data);
         socket.broadcast.emit('draw', { x, y, color: clients[socket.id] });
-    });
+      });
 
     // stop drawing event
     socket.on('stopDrawing', () => {
-        drawingData.push({ type: 'stop' });
+        const data = { type: 'stop' };
+        db.insertDrawingData(data);
         socket.broadcast.emit('stopDrawing');
-    });
+      });
 
     // change stroke color event
     socket.on('changeStrokeColor', (color) => {
