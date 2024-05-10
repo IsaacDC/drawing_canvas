@@ -21,12 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", stopDrawing);
 
-  const colorPicker = document.getElementById('strokeColor');
-  colorPicker.addEventListener('input', () => {
-      color = colorPicker.value;
-      socket.emit('changeStrokeColor', color);
+  const colorPicker = document.getElementById("strokeColor");
+  colorPicker.addEventListener("input", () => {
+    color = colorPicker.value;
+    socket.emit("changeStrokeColor", color);
   });
-
 
   function startDrawing(e) {
     isDrawing = true;
@@ -52,21 +51,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // incoming socket events
-  socket.on('loadDrawingData', ( drawingData, clients) => {
+  socket.on("loadDrawingData", (drawingData) => {
     drawingData.forEach((data) => {
-        if (data.type === 'start') {
-            ctx.beginPath();
-            ctx.moveTo(data.x, data.y);
-            ctx.strokeStyle = data.color;
-        } else if (data.type === 'draw') {
-            ctx.lineTo(data.x, data.y);
-            ctx.strokeStyle = data.color;
-            ctx.stroke();
-        } else if (data.type === 'stop') {
-            ctx.beginPath();
-        }
+      if (data.type === "start") {
+        ctx.beginPath();
+        ctx.moveTo(data.x, data.y);
+        ctx.strokeStyle = data.color;
+      } else if (data.type === "draw") {
+        ctx.lineTo(data.x, data.y);
+        ctx.strokeStyle = data.color;
+        ctx.stroke();
+      } else if (data.type === "stop") {
+        ctx.beginPath();
+      }
     });
-});
+  });
 
   socket.on("startDrawing", ({ x, y, color }) => {
     ctx.beginPath();
@@ -86,10 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.beginPath();
   });
 
-  socket.on('changeStrokeColor', ({ socketId, color }) => {
+  socket.on("changeStrokeColor", ({ socketId, color }) => {
     clients[socketId] = color;
-});
+  });
 
   resizeCanvas();
-
 });
