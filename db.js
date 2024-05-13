@@ -1,7 +1,7 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('drawings.db');
+const sqlite3 = require("sqlite3");
+const db = new sqlite3.Database("drawings.db");
 
-// Create the 'drawings' table if it doesn't exist
+//create drawings table
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS drawings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,15 +12,20 @@ db.serialize(() => {
   )`);
 });
 
-// Insert a new drawing data
+//insert drawing data
 const insertDrawingData = (data) => {
   const { type, x, y, color } = data;
-  db.run('INSERT INTO drawings (type, x, y, color) VALUES (?, ?, ?, ?)', [type, x, y, color]);
+  db.run("INSERT INTO drawings (type, x, y, color) VALUES (?, ?, ?, ?)", [
+    type,
+    x,
+    y,
+    color,
+  ]);
 };
 
-// Get all drawing data
+//gets all drawing data
 const getAllDrawingData = (callback) => {
-  db.all('SELECT * FROM drawings', (err, rows) => {
+  db.all("SELECT * FROM drawings", (err, rows) => {
     if (err) {
       console.error(err);
       return;
@@ -29,7 +34,18 @@ const getAllDrawingData = (callback) => {
   });
 };
 
+const deleteAllDrawings = () => {
+  db.run("DELETE * FROM drawings", (err) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log("all drawings delete");
+  });
+};
+
 module.exports = {
   insertDrawingData,
   getAllDrawingData,
+  deleteAllDrawings,
 };

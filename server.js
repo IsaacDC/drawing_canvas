@@ -1,54 +1,63 @@
 const express = require("express");
-const app = express();
-const server = app.listen(3000, () => {
-  console.log("Server is running");
-});
-app.use(express.static('public'));
+const { createServer } = require("node:http");
+const { join } = require("node:path");
+const socket = require("socket.io");
 
-const socket = require('socket.io');
-const io = socket(server);
-const db = require('./db');
+const app = express();
+const server = createServer(app);
+const io = socket(server, { connectionStateRecovery: {} });
+app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+  res.sendFile(join(__dirname, "index.html"));
+});
+
+const db = require("./db");
 
 const clients = {};
 
-io.on('connection', (socket) => {
-    console.log('A user connected');
-    clients[socket.id] = '#000000';
+io.on("connection", (socket) => {
+  console.log("A user connected");
+  clients[socket.id] = "#000000";
 
-    db.getAllDrawingData((drawingData) => {
-        socket.emit('loadDrawingData', drawingData, clients);
-      });
+  db.getAllDrawingData((drawingData) => {
+    socket.emit("loadDrawingData", drawingData, clients);
+  });
 
-    // start drawing event
-    socket.on('startDrawing', ({ x, y }) => {
-        const data = { type: 'start', x, y, color: clients[socket.id] };
-        db.insertDrawingData(data);
-        socket.broadcast.emit('startDrawing', { x, y, color: clients[socket.id] });
-      });
+  // start drawing event
+  socket.on("startDrawing", ({ x, y }) => {
+    const data = { type: "start", x, y, color: clients[socket.id] };
+    db.insertDrawingData(data);
+    socket.broadcast.emit("startDrawing", { x, y, color: clients[socket.id] });
+  });
 
-    // drawing event
-    socket.on('draw', ({ x, y }) => {
-        const data = { type: 'draw', x, y, color: clients[socket.id] };
-        db.insertDrawingData(data);
-        socket.broadcast.emit('draw', { x, y, color: clients[socket.id] });
-      });
+  // drawing event
+  socket.on("draw", ({ x, y }) => {
+    const data = { type: "draw", x, y, color: clients[socket.id] };
+    db.insertDrawingData(data);
+    socket.broadcast.emit("draw", { x, y, color: clients[socket.id] });
+  });
 
-    // stop drawing event
-    socket.on('stopDrawing', () => {
-        const data = { type: 'stop' };
-        db.insertDrawingData(data);
-        socket.broadcast.emit('stopDrawing');
-      });
+  // stop drawing event
+  socket.on("stopDrawing", () => {
+    const data = { type: "stop" };
+    db.insertDrawingData(data);
+    socket.broadcast.emit("stopDrawing");
+  });
 
-    // change stroke color event
-    socket.on('changeStrokeColor', (color) => {
-        clients[socket.id] = color;
-        socket.broadcast.emit('changeStrokeColor', { socketId: socket.id, color });
-    });
+  // change stroke color event
+  socket.on("changeStrokeColor", (color) => {
+    clients[socket.id] = color;
+    socket.broadcast.emit("changeStrokeColor", { socketId: socket.id, color });
+  });
 
-    // disconnect event
-    socket.on('disconnect', () => {
-        console.log('A user disconnected');
-        delete clients[socket.id];
-    });
+  // disconnect event
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+    delete clients[socket.id];
+  });
+});
+
+server.listen(3000, () => {
+  console.log("server running at http://127.0.0.1:3000");
 });

@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect("http://127.0.0.1:3000");
-  const canvas = document.querySelector("canvas");
+  const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
   const resizeCanvas = () => {
