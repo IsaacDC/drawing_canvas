@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
+  //resize canvas
   const resizeCanvas = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -21,12 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", stopDrawing);
 
+  //updates stroke color
   const colorPicker = document.getElementById("strokeColor");
   colorPicker.addEventListener("input", () => {
     color = colorPicker.value;
     socket.emit("changeStrokeColor", color);
   });
 
+  //begins the drawing process (when mouse down)
   function startDrawing(e) {
     isDrawing = true;
     [lastMouseX, lastMouseY] = [e.offsetX, e.offsetY];
@@ -36,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.emit("startDrawing", { x: lastMouseX, y: lastMouseY });
   }
 
+  //draws as mouse drags
   function draw(e) {
     if (!isDrawing) return;
     ctx.lineTo(e.offsetX, e.offsetY);
@@ -44,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     [lastMouseX, lastMouseY] = [e.offsetX, e.offsetY];
   }
 
+  //stops drawing when mouse up
   function stopDrawing() {
     isDrawing = false;
     ctx.beginPath();
@@ -67,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  //draws on the non-drawing client(s) screen(s)
   socket.on("startDrawing", ({ x, y, color }) => {
     ctx.beginPath();
     ctx.moveTo(x, y);
