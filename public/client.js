@@ -91,8 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.beginPath();
   });
 
-  socket.on("changeStrokeColor", ({ socketId, color }) => {
-    clients[socketId] = color;
+  socket.on("changeStrokeColor", ({ sessionID, color }) => {
+    clients[sessionID] = color;
   });
 
   resizeCanvas();

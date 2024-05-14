@@ -2,7 +2,6 @@ const express = require("express");
 const session = require("express-session");
 const socket = require("socket.io");
 const { v4: uuidv4 } = require("uuid");
-// const cookieParser = require("cooker-parser");
 
 const { createServer } = require("node:http");
 const { join } = require("node:path");
@@ -16,61 +15,71 @@ app.use(
     secret: "secret",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    },
     genid: (req) => uuidv4(),
   })
 );
 app.use(express.static("public"));
-
 app.get("/", (req, res) => {
-  console.log(req.session);
-  console.log(req.session.genid);
-  req.session.visited = true;
-  res.sendFile(join(__dirname, "index.html"));
+  db.getSessionID(req.session.id, (row) => {
+    if (row) {
+      console.log("Session ID:", req.session.id);
+    } else {
+      db.insertUserData(req.session.id, "#000000");
+      console.log("Welcome to this page for the first time!");
+    }
+    res.sendFile(join(__dirname, "index.html"));
+  });
 });
 
 const db = require("./db");
 
-const clients = {};
-
 io.on("connection", (socket) => {
-  console.log("A user connected");
-  clients[socket.id] = "#000000";
+  console.log(socket.id + " connected");
+
+  db.insertUserData(socket.handshake.sessionID, '#000000');
 
   db.getAllDrawingData((drawingData) => {
-    socket.emit("loadDrawingData", drawingData, clients);
+    socket.emit("loadDrawingData", drawingData);
   });
 
   // start drawing event
   socket.on("startDrawing", ({ x, y }) => {
-    const data = { type: "start", x, y, color: clients[socket.id] };
-    db.insertDrawingData(data);
-    socket.broadcast.emit("startDrawing", { x, y, color: clients[socket.id] });
+    db.getUserStrokeColor(socket.handshake.sessionID, (color) => {
+      const data = { type: "start", x, y, color };
+      db.insertDrawingData(socket.handshake.sessionID, data);
+      socket.broadcast.emit("startDrawing", { x, y, color });
+    });
   });
 
   // drawing event
   socket.on("draw", ({ x, y }) => {
-    const data = { type: "draw", x, y, color: clients[socket.id] };
-    db.insertDrawingData(data);
-    socket.broadcast.emit("draw", { x, y, color: clients[socket.id] });
+    db.getUserStrokeColor(socket.handshake.sessionID, (color) => {
+      const data = { type: "draw", x, y, color };
+      db.insertDrawingData(socket.handshake.sessionID, data);
+      socket.broadcast.emit("draw", { x, y, color });
+    });
   });
 
   // stop drawing event
   socket.on("stopDrawing", () => {
-    const data = { type: "stop" };
-    db.insertDrawingData(data);
-    socket.broadcast.emit("stopDrawing");
+    db.getUserStrokeColor(socket.handshake.sessionID, (color) => {
+      const data = { type: "stop", color };
+      db.insertDrawingData(socket.handshake.sessionID, data);
+      socket.broadcast.emit("stopDrawing");
+    });
   });
 
   // change stroke color event
   socket.on("changeStrokeColor", (color) => {
-    clients[socket.id] = color;
+    db.changeStrokeColor(socket.handshake.sessionID, color);
     socket.broadcast.emit("changeStrokeColor", { socketId: socket.id, color });
   });
-
   // disconnect event
   socket.on("disconnect", () => {
     console.log("A user disconnected");
-    delete clients[socket.id];
   });
 });
 
