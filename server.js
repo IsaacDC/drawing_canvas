@@ -1,14 +1,30 @@
 const express = require("express");
+const session = require("express-session");
+const socket = require("socket.io");
+const { v4: uuidv4 } = require("uuid");
+// const cookieParser = require("cooker-parser");
+
 const { createServer } = require("node:http");
 const { join } = require("node:path");
-const socket = require("socket.io");
 
 const app = express();
 const server = createServer(app);
 const io = socket(server, { connectionStateRecovery: {} });
+
+app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false,
+    genid: (req) => uuidv4(),
+  })
+);
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
+  console.log(req.session);
+  console.log(req.session.genid);
+  req.session.visited = true;
   res.sendFile(join(__dirname, "index.html"));
 });
 

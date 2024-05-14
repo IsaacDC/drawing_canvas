@@ -4,7 +4,7 @@ const db = new sqlite3.Database("drawings.db");
 //create drawings table
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS drawings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uuid TEXT PRIMARY KEY,
     type TEXT,
     x REAL,
     y REAL,
@@ -12,6 +12,11 @@ db.serialize(() => {
   )`);
 });
 
+//insert new user
+const insertNewUser = (data) => {
+  const { uuid } = data;
+  db.run("INSERT INTO drawings (uuid) VALUES (?)", [uuid]);
+};
 //insert drawing data
 const insertDrawingData = (data) => {
   const { type, x, y, color } = data;
