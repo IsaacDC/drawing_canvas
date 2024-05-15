@@ -1,13 +1,7 @@
 const sqlite3 = require("sqlite3");
 const db = new sqlite3.Database("drawings.db");
 
-//create drawings table
 db.serialize(() => {
-  // Create the users table
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    sessionID TEXT PRIMARY KEY,
-    strokeColor TEXT
-  )`);
 
   // Create the drawings table
   db.run(`CREATE TABLE IF NOT EXISTS drawings (
@@ -15,37 +9,34 @@ db.serialize(() => {
     type TEXT,
     x REAL,
     y REAL,
-    color TEXT,
-    FOREIGN KEY (sessionID) REFERENCES users(sessionID)
+    color TEXT
   )`);
 });
 
-//
-const checkSessionID = (sessionID, callback) => {
-  db.get("SELECT * FROM users WHERE sessionID = ?", [sessionID], (err, row) => {
+const getColorForSession = (sessionID, callback) => {
+  db.get(`SELECT color FROM drawings WHERE session_id = ?`, [sessionID], (err, row) => {
     if (err) {
-      console.error("checkSessionID" + err);
-      return;
+      console.error("Error retrieving color from database:", err);
+      callback(null);
+    } else {
+      if (row) {
+        callback(row.color);
+      } else {
+        callback(null);
+      }
     }
-    callback(row);
   });
-};
+}
 
-const insertUserData = (sessionID, strokeColor) => {
-  db.run("INSERT OR REPLACE INTO users (sessionID, strokeColor) VALUES (?, ?)", [sessionID, strokeColor]);
-};
-
-const changeStrokeColor = (sessionID, strokeColor) => {
-  db.run("UPDATE users SET strokeColor = ? WHERE sessionID = ?", [strokeColor, sessionID]);
-};
-
-const getUserStrokeColor = (sessionID, callback) => {
-  db.get("SELECT strokeColor FROM users WHERE sessionID = ?", [sessionID], (err, row) => {
+const checkSessionID = (sessionID, callback) => {
+  db.get("SELECT COUNT(*) AS count FROM drawings WHERE sessionID = ?", [sessionID], (err, row) => {
     if (err) {
-      console.error("getUserStrokeColor" + err);
+      console.error("checkDrawingData error:", err);
+      callback(false);
       return;
     }
-    callback(row ? row.strokeColor : null);
+    const exists = row.count > 0;
+    callback(exists);
   });
 };
 
@@ -84,13 +75,22 @@ const deleteAllDrawings = () => {
   });
 };
 
+const close = (callback) => {
+  db.close((err) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    callback();
+  });
+};
+
 module.exports = {
-  insertUserData,
+  checkSessionID,
+  getColorForSession,
   insertDrawingData,
   getAllDrawingData,
   deleteAllDrawings,
-  checkSessionID,
-  getUserStrokeColor,
-  changeStrokeColor,
+  close,
 };
 

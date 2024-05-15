@@ -10,9 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "connect-redis": "^7.1.1",
+    "connect-sqlite3": "^0.9.15",
     "cookie-parser": "^1.4.6",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "mock-res": "^0.6.0",
     "socket.io": "^4.7.5",
     "sqlite3": "^5.1.7",
     "uuid": "^9.0.1"
