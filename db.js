@@ -52,7 +52,7 @@ const getUserStrokeColor = (sessionID, callback) => {
 //insert drawing data
 const insertDrawingData = (sessionID, data) => {
   const { type, x, y, color } = data;
-  db.run("INSERT INTO drawings (sessionID, type, x, y, color) VALUES (?, ?, ?, ?)", [
+  db.run("INSERT INTO drawings (sessionID, type, x, y, color) VALUES (?, ?, ?, ?, ?)", [
     sessionID,
     type,
     x,
