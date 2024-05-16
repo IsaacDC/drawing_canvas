@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastMouseX = 0;
   let lastMouseY = 0;
   let color;
+  const clients = {};
+
 
   // mouse events
   canvas.addEventListener("mousedown", startDrawing);

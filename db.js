@@ -1,4 +1,4 @@
-const sqlite3 = require("sqlite3");
+const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("drawings.db");
 
 db.serialize(() => {
@@ -13,20 +13,6 @@ db.serialize(() => {
   )`);
 });
 
-const getColorForSession = (sessionID, callback) => {
-  db.get(`SELECT color FROM drawings WHERE session_id = ?`, [sessionID], (err, row) => {
-    if (err) {
-      console.error("Error retrieving color from database:", err);
-      callback(null);
-    } else {
-      if (row) {
-        callback(row.color);
-      } else {
-        callback(null);
-      }
-    }
-  });
-}
 
 const checkSessionID = (sessionID, callback) => {
   db.get("SELECT COUNT(*) AS count FROM drawings WHERE sessionID = ?", [sessionID], (err, row) => {
@@ -87,7 +73,6 @@ const close = (callback) => {
 
 module.exports = {
   checkSessionID,
-  getColorForSession,
   insertDrawingData,
   getAllDrawingData,
   deleteAllDrawings,
