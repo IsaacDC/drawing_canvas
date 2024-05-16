@@ -23,6 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", stopDrawing);
 
+  const eraseDrawings = document.getElementById("erase");
+  eraseDrawings.addEventListener("click", () => {
+    socket.emit("eraseDrawings");
+  });
+
   //updates stroke color
   const colorPicker = document.getElementById("strokeColor");
   colorPicker.addEventListener("input", () => {
@@ -92,8 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.beginPath();
   });
 
-  socket.on("changeStrokeColor", ({ sessionID, color }) => {
-    clients[sessionID] = color;
+  socket.on("changeStrokeColor", ({sessionId, color }) => {
+    clients[sessionId] = color;
   });
 
   resizeCanvas();

@@ -1,18 +1,24 @@
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("drawings.db");
 
+
 db.serialize(() => {
 
   // Create the drawings table
   db.run(`CREATE TABLE IF NOT EXISTS drawings (
-    sessionID TEXT PRIMARY KEY,
+    id INT auto_increment,
+    sessionID TEXT,
     type TEXT,
     x REAL,
     y REAL,
-    color TEXT
+    color TEXT DEFAULT '#000000'
   )`);
 });
 
+
+const eraseDrawings = (sessionID) => {
+  db.run("DELETE FROM drawings WHERE sessionID =?", [sessionID]);
+}
 
 const checkSessionID = (sessionID, callback) => {
   db.get("SELECT COUNT(*) AS count FROM drawings WHERE sessionID = ?", [sessionID], (err, row) => {
@@ -77,5 +83,6 @@ module.exports = {
   getAllDrawingData,
   deleteAllDrawings,
   close,
+  eraseDrawings,
 };
 

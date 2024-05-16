@@ -1,8 +1,8 @@
 const express = require("express");
-const {Server} = require('socket.io');
+const { Server } = require('socket.io');
 const cookieParser = require('cookie-parser');
 
-const { sessionMiddleware, wrap } = require('./sessionStore');
+const { sessionMiddleware } = require('./sessionStore');
 
 const { createServer } = require("node:http");
 const { join } = require("node:path");
@@ -10,7 +10,7 @@ const { join } = require("node:path");
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-  cors:{
+  cors: {
     origin: 'http://localhost:3000',
     credentials: true,
   }
@@ -23,65 +23,62 @@ app.use(sessionMiddleware);
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
+  if (req.session) {
+    console.log(req.session);
+  } else {
+    res.send("Invalid session");
+  }
   res.sendFile(join(__dirname, "index.html"));
 });
 
 const clients = {};
 
-io.use(wrap(sessionMiddleware));
+io.engine.use(sessionMiddleware);
 io.on("connection", (socket) => {
-  const sessionID = socket.request.session.id;
+  const sessionId = socket.request.session.id;
 
-  if (sessionID) {
-    // check if it's in the database
-    db.checkSessionID(sessionID, function (exists) {
-      if (exists) {
-        console.log(req.session);
-        console.log(sessionID);
-        req.session.visited = true;
-      } else {
-        //insert it
-        db.insertDrawingData(sessionID, function () {
-          console.log("Welcome" + sessionID);
-        });
-      }
-    });
-  }
+  console.log(socket.request.session);
+  console.log(sessionId + ' connected');
+  clients[sessionId] = '#000000';
 
   db.getAllDrawingData((drawingData) => {
     socket.emit("loadDrawingData", drawingData);
   });
 
   // start drawing event
-  socket.on("startDrawing", ({ x, y }) => {
-    const data = { type: "start", x, y, color: clients[sessionID]};
-    db.insertDrawingData(data);
-    socket.broadcast.emit("startDrawing", { x, y, color: clients[sessionID] });
+  socket.on('startDrawing', ({ x, y }) => {
+    const data = { type: 'start', x, y, color: clients[sessionId] };
+    db.insertDrawingData(sessionId, data); socket.broadcast.emit('startDrawing', { x, y, color: clients[sessionId] });
   });
 
   // drawing event
-  socket.on("draw", ({ x, y }) => {
-    const data = { type: "draw", x, y, color: clients[sessionID] };
-    db.insertDrawingData(data);
-    socket.broadcast.emit("draw", { x, y, color: clients[sessionID] });
+  socket.on('draw', ({ x, y }) => {
+    const data = { type: 'draw', x, y, color: clients[sessionId] };
+    db.insertDrawingData(sessionId, data); socket.broadcast.emit('draw', { x, y, color: clients[sessionId] });
   });
 
   // stop drawing event
-  socket.on("stopDrawing", () => {
-    const data = { type: "stop" };
-    db.insertDrawingData(data);
-    socket.broadcast.emit("stopDrawing");
+  socket.on('stopDrawing', () => {
+    const data = { type: 'stop' };
+    db.insertDrawingData(sessionId, data);
+    socket.broadcast.emit('stopDrawing');
   });
 
   // change stroke color event
-  socket.on("changeStrokeColor", (color) => {
-    clients[socket.id] = color;
-    socket.broadcast.emit("changeStrokeColor", { sessionID: sessionID, color: clients[sessionID] });;
+  socket.on('changeStrokeColor', (color) => {
+    clients[sessionId] = color;
+    socket.broadcast.emit('changeStrokeColor', { socketId: sessionId, color });
   });
-  
+
+  socket.on('eraseDrawings', () => {
+    db.eraseDrawings(sessionId);
+    socket.broadcast.emit('eraseDrawings');
+  });
+
   // disconnect event
-  socket.on("disconnect", () => {
-    console.log("A user disconnected");
+  socket.on('disconnect', () => {
+    console.log(sessionId + ' disconnected');
+    delete clients[sessionId];
   });
 });
 
