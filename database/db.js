@@ -20,18 +20,6 @@ const eraseDrawings = (sessionID) => {
   db.run("DELETE FROM drawings WHERE sessionID =?", [sessionID]);
 }
 
-const checkSessionID = (sessionID, callback) => {
-  db.get("SELECT COUNT(*) AS count FROM drawings WHERE sessionID = ?", [sessionID], (err, row) => {
-    if (err) {
-      console.error("checkDrawingData error:", err);
-      callback(false);
-      return;
-    }
-    const exists = row.count > 0;
-    callback(exists);
-  });
-};
-
 //insert drawing data
 const insertDrawingData = (sessionID, data) => {
   const { type, x, y, color } = data;
@@ -78,7 +66,6 @@ const close = (callback) => {
 };
 
 module.exports = {
-  checkSessionID,
   insertDrawingData,
   getAllDrawingData,
   deleteAllDrawings,

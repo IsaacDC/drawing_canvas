@@ -24,7 +24,6 @@ app.use(express.static("public"));
 
 app.get("/canvas", (req, res) => {
   if (req.session) {
-    req.session.visited = true;
     req.session.save(() => {
       console.log(req.session.id +' connected');
     });
@@ -39,6 +38,7 @@ const clients = {};
 io.use(wrap(sessionMiddleware));
 io.on("connection", (socket) => {
   const sessionId = socket.request.session.id;
+  console.log(sessionId +' connected');
 
   clients[sessionId] = '#000000';
 
@@ -78,7 +78,7 @@ io.on("connection", (socket) => {
 
   // disconnect event
   socket.on('disconnect', () => {
-    console.log('Disconnected');
+    console.log(sessionId + ' disconnected');
     delete clients[sessionId];
   });
 });

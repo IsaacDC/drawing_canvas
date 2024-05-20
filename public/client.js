@@ -1,7 +1,7 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const socket = io.connect("http://127.0.0.1:3000/canvas");
+  const socket = io.connect("http://127.0.0.1:3000");
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.emit("stopDrawing");
   }
 
-  // incoming socket events
+  // Incoming socket events
   socket.on("loadDrawingData", (drawingData) => {
     drawingData.forEach((data) => {
       if (data.type === "start") {
