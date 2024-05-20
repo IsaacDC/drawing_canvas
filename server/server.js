@@ -2,7 +2,7 @@ const express = require("express");
 const { Server } = require('socket.io');
 const cookieParser = require('cookie-parser');
 
-const { sessionMiddleware } = require('./sessionStore');
+const { sessionMiddleware, wrap } = require('../server/sessionStore');
 
 const { createServer } = require("node:http");
 const { join } = require("node:path");
@@ -16,29 +16,30 @@ const io = new Server(server, {
   }
 });
 
-const db = require("./db");
+const db = require("../database/db");
 
 app.use(cookieParser());
 app.use(sessionMiddleware);
 app.use(express.static("public"));
 
-app.get("/", (req, res) => {
+app.get("/canvas", (req, res) => {
   if (req.session) {
-    console.log(req.session);
+    req.session.visited = true;
+    req.session.save(() => {
+      console.log(req.session.id +' connected');
+    });
   } else {
     res.send("Invalid session");
   }
-  res.sendFile(join(__dirname, "index.html"));
+  res.sendFile(join(__dirname, "../public/index.html"));
 });
 
 const clients = {};
 
-io.engine.use(sessionMiddleware);
+io.use(wrap(sessionMiddleware));
 io.on("connection", (socket) => {
   const sessionId = socket.request.session.id;
 
-  console.log(socket.request.session);
-  console.log(sessionId + ' connected');
   clients[sessionId] = '#000000';
 
   db.getAllDrawingData((drawingData) => {
@@ -77,7 +78,7 @@ io.on("connection", (socket) => {
 
   // disconnect event
   socket.on('disconnect', () => {
-    console.log(sessionId + ' disconnected');
+    console.log('Disconnected');
     delete clients[sessionId];
   });
 });
@@ -108,5 +109,5 @@ process.on('SIGTERM', () => {
 });
 
 server.listen(3000, () => {
-  console.log("server running at http://127.0.0.1:3000");
+  console.log("server running at http://127.0.0.1:3000/canvas");
 });
