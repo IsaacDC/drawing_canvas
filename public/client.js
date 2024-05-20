@@ -5,34 +5,43 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
-  //resize canvas
-  const resizeCanvas = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  };
-
   let isDrawing = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
   let color;
   const clients = {};
 
-
   // mouse events
   canvas.addEventListener("mousedown", startDrawing);
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", stopDrawing);
 
-  const eraseDrawings = document.getElementById("erase");
+  //Clears drawings
+  const eraseDrawings = document.getElementById("clear");
   eraseDrawings.addEventListener("click", () => {
-    socket.emit("eraseDrawings");
+    socket.emit("clearDrawings");
   });
 
   //updates stroke color
-  const colorPicker = document.getElementById("strokeColor");
+  const colorPicker = document.getElementById("stroke-color");
   colorPicker.addEventListener("input", () => {
     color = colorPicker.value;
     socket.emit("changeStrokeColor", color);
+  });
+
+  const colorFields = document.querySelectorAll('.color-field');
+  colorFields.forEach((colorField) => {
+    colorField.addEventListener('click', () => {
+      color = colorField.style.backgroundColor;
+      socket.emit("changeStrokeColor", color);
+    });
+  });
+
+  //change stroke width
+  const strokeWidth = document.getElementById('stroke-width');
+  strokeWidth.addEventListener('input', () => {
+    ctx.lineWidth = strokeWidth.value;
+    socket.emit("changeStrokeWidth", strokeWidth.value);
   });
 
   //begins the drawing process (when mouse down)
@@ -42,7 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.beginPath();
     ctx.moveTo(lastMouseX, lastMouseY);
     ctx.strokeStyle = color;
-    socket.emit("startDrawing", { x: lastMouseX, y: lastMouseY });
+    ctx.lineCap = "round";
+    ctx.lineWidth = strokeWidth.value;
+    socket.emit("startDrawing", { x: lastMouseX, y: lastMouseY, width: strokeWidth.value });;
   }
 
   //draws as mouse drags
@@ -68,9 +79,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.beginPath();
         ctx.moveTo(data.x, data.y);
         ctx.strokeStyle = data.color;
+        ctx.lineWidth = data.width;
       } else if (data.type === "draw") {
         ctx.lineTo(data.x, data.y);
         ctx.strokeStyle = data.color;
+        ctx.lineWidth = data.width;
         ctx.stroke();
       } else if (data.type === "stop") {
         ctx.beginPath();
@@ -97,9 +110,23 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.beginPath();
   });
 
-  socket.on("changeStrokeColor", ({sessionId, color }) => {
+
+  socket.on("changeStrokeColor", ({ sessionId, color }) => {
     clients[sessionId] = color;
   });
+
+  socket.on('changeStrokeWidth', ({ socketId, width }) => {
+    if (socketId !== socket.id) {
+      ctx.lineWidth = width;
+    }
+  });
+
+
+  //resize canvas
+  const resizeCanvas = () => {
+    canvas.width = window.innerWidth - 60;
+    canvas.height = window.innerHeight - 150;
+  };
 
   resizeCanvas();
 });

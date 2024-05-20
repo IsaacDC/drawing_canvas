@@ -11,24 +11,26 @@ db.serialize(() => {
     type TEXT,
     x REAL,
     y REAL,
-    color TEXT DEFAULT '#000000'
+    color TEXT DEFAULT '#000000',
+    width INTEGER DEFAULT 5
   )`);
 });
 
 
-const eraseDrawings = (sessionID) => {
+const clearDrawings = (sessionID) => {
   db.run("DELETE FROM drawings WHERE sessionID =?", [sessionID]);
 }
 
 //insert drawing data
 const insertDrawingData = (sessionID, data) => {
-  const { type, x, y, color } = data;
-  db.run("INSERT INTO drawings (sessionID, type, x, y, color) VALUES (?, ?, ?, ?, ?)", [
+  const { type, x, y, color, width } = data;
+  db.run("INSERT INTO drawings (sessionID, type, x, y, color, width) VALUES (?, ?, ?, ?, ?, ?)", [
     sessionID,
     type,
     x,
     y,
     color,
+    width,
   ]);
 };
 
@@ -70,6 +72,6 @@ module.exports = {
   getAllDrawingData,
   deleteAllDrawings,
   close,
-  eraseDrawings,
+  clearDrawings,
 };
 

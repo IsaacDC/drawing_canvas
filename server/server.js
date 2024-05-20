@@ -47,15 +47,17 @@ io.on("connection", (socket) => {
   });
 
   // start drawing event
-  socket.on('startDrawing', ({ x, y }) => {
-    const data = { type: 'start', x, y, color: clients[sessionId] };
-    db.insertDrawingData(sessionId, data); socket.broadcast.emit('startDrawing', { x, y, color: clients[sessionId] });
+  socket.on('startDrawing', ({ x, y, width }) => {
+    const data = { type: 'start', x, y, color: clients[sessionId], width };
+    db.insertDrawingData(sessionId, data); 
+    socket.broadcast.emit('startDrawing', { x, y, color: clients[sessionId], width });
   });
 
   // drawing event
   socket.on('draw', ({ x, y }) => {
     const data = { type: 'draw', x, y, color: clients[sessionId] };
-    db.insertDrawingData(sessionId, data); socket.broadcast.emit('draw', { x, y, color: clients[sessionId] });
+    db.insertDrawingData(sessionId, data); 
+    socket.broadcast.emit('draw', { x, y, color: clients[sessionId] });
   });
 
   // stop drawing event
@@ -71,9 +73,15 @@ io.on("connection", (socket) => {
     socket.broadcast.emit('changeStrokeColor', { socketId: sessionId, color });
   });
 
-  socket.on('eraseDrawings', () => {
-    db.eraseDrawings(sessionId);
-    socket.broadcast.emit('eraseDrawings');
+  //change stroke width event
+  socket.on('changeStrokeWidth', (width) => {
+    socket.broadcast.emit('changeStrokeWidth', { socketId: sessionId, width });
+  });
+
+  // clear drawings event
+  socket.on('clearDrawings', () => {
+    db.clearDrawings(sessionId);
+    socket.broadcast.emit('clearDrawings', sessionId);
   });
 
   // disconnect event
