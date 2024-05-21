@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../styles/reset.css">
+    <title>Admin</title>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <h1>Data from SQLite Database</h1>
+    <div id="data-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>SessionID</th>
+                    <th>Type</th>
+                    <th>X</th>
+                    <th>Y</th>
+                    <th>Color</th>
+                    <th>Width</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+            </tbody>
+        </table>
+    </div>
+    
+    <script src="../public/client.js"></script>
+    <script src="admin.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</body>
+</html>

@@ -21,11 +21,14 @@ const db = require("../database/db");
 app.use(cookieParser());
 app.use(sessionMiddleware);
 app.use(express.static("public"));
+app.use(express.static("admin"));
+app.set("view engine", "ejs");
+app.set('views', join(__dirname, '../admin'));
 
 app.get("/canvas", (req, res) => {
   if (req.session) {
     req.session.save(() => {
-      console.log(req.session.id +' connected');
+      console.log(req.session.id + ' connected');
     });
   } else {
     res.send("Invalid session");
@@ -33,12 +36,28 @@ app.get("/canvas", (req, res) => {
   res.sendFile(join(__dirname, "../public/index.html"));
 });
 
+app.get('/admin', (req, res) => {
+  db.getAllDrawingData((drawingData) => {
+    res.render('admin', { drawingData });
+  });
+});
+
+app.delete('/delete/:sessionId', (req, res) => {
+  const sessionId = req.params.sessionId;
+  db.deleteDrawingsBySessionID(sessionId, (result) => {
+    if (result) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false });
+    }
+  });
+});
+
 const clients = {};
 
 io.use(wrap(sessionMiddleware));
 io.on("connection", (socket) => {
   const sessionId = socket.request.session.id;
-  console.log(sessionId +' connected');
 
   clients[sessionId] = '#000000';
 
@@ -49,14 +68,14 @@ io.on("connection", (socket) => {
   // start drawing event
   socket.on('startDrawing', ({ x, y, width }) => {
     const data = { type: 'start', x, y, color: clients[sessionId], width };
-    db.insertDrawingData(sessionId, data); 
+    db.insertDrawingData(sessionId, data);
     socket.broadcast.emit('startDrawing', { x, y, color: clients[sessionId], width });
   });
 
   // drawing event
   socket.on('draw', ({ x, y }) => {
     const data = { type: 'draw', x, y, color: clients[sessionId] };
-    db.insertDrawingData(sessionId, data); 
+    db.insertDrawingData(sessionId, data);
     socket.broadcast.emit('draw', { x, y, color: clients[sessionId] });
   });
 

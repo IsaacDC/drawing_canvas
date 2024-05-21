@@ -1,0 +1,41 @@
+#canvas {
+    box-shadow: -3px 2px 9px 6px black;
+    border: solid black 2px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f0f0f0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+th,
+td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+.collapsible {
+    cursor: pointer;
+}
+
+.content {
+    display: none;
+}
+
+.active .content {
+    display: table-row-group;
+}

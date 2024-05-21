@@ -6,7 +6,6 @@ db.serialize(() => {
 
   // Create the drawings table
   db.run(`CREATE TABLE IF NOT EXISTS drawings (
-    id INT auto_increment,
     sessionID TEXT,
     type TEXT,
     x REAL,
@@ -16,10 +15,20 @@ db.serialize(() => {
   )`);
 });
 
-
 const clearDrawings = (sessionID) => {
   db.run("DELETE FROM drawings WHERE sessionID =?", [sessionID]);
 }
+
+const deleteDrawingsBySessionID = (sessionId, callback) => {
+  db.run("DELETE FROM drawings WHERE sessionID = ?", [sessionId], function(err) {
+    if (err) {
+      console.error("deleteDrawingsBySessionID: " + err);
+      callback(false);
+      return;
+    }
+    callback(true);
+  });
+};
 
 //insert drawing data
 const insertDrawingData = (sessionID, data) => {
@@ -73,5 +82,6 @@ module.exports = {
   deleteAllDrawings,
   close,
   clearDrawings,
+  deleteDrawingsBySessionID
 };
 
