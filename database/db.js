@@ -11,14 +11,12 @@ db.serialize(() => {
     x REAL,
     y REAL,
     color TEXT DEFAULT '#000000',
-    width INTEGER DEFAULT 5
+    width INTEGER DEFAULT 5,
+    linecap text DEFAULT 'round'
   )`);
 });
 
-const clearDrawings = (sessionID) => {
-  db.run("DELETE FROM drawings WHERE sessionID =?", [sessionID]);
-}
-
+//deletes all drawings for a specific session ID
 const deleteDrawingsBySessionID = (sessionId, callback) => {
   db.run("DELETE FROM drawings WHERE sessionID = ?", [sessionId], function(err) {
     if (err) {
@@ -56,16 +54,17 @@ const getAllDrawingData = (callback) => {
 
 
 //deletes all drawings
-const deleteAllDrawings = () => {
-  db.run("DELETE * FROM drawings", (err) => {
+const clearCanvas = () => {
+  db.run("DELETE FROM drawings", (err) => {
     if (err) {
       console.log(err);
       return;
     }
-    console.log("all drawings deleted");
+    console.log("All drawings deleted");
   });
 };
 
+//closes connection to database
 const close = (callback) => {
   db.close((err) => {
     if (err) {
@@ -79,9 +78,8 @@ const close = (callback) => {
 module.exports = {
   insertDrawingData,
   getAllDrawingData,
-  deleteAllDrawings,
+  clearCanvas,
   close,
-  clearDrawings,
   deleteDrawingsBySessionID
 };
 

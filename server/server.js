@@ -38,7 +38,7 @@ app.get("/canvas", (req, res) => {
 
 app.get('/admin', (req, res) => {
   db.getAllDrawingData((drawingData) => {
-    res.render('admin', { drawingData });
+    res.render('admin', { drawingData, renderCanvas: true });
   });
 });
 
@@ -51,6 +51,10 @@ app.delete('/delete/:sessionId', (req, res) => {
       res.json({ success: false });
     }
   });
+});
+
+app.delete('/clear', (req, res) => {
+  db.clearCanvas();
 });
 
 const clients = {};
@@ -73,10 +77,10 @@ io.on("connection", (socket) => {
   });
 
   // drawing event
-  socket.on('draw', ({ x, y }) => {
-    const data = { type: 'draw', x, y, color: clients[sessionId] };
+  socket.on('draw', ({ x, y, width }) => {
+    const data = { type: 'draw', x, y, color: clients[sessionId], width };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit('draw', { x, y, color: clients[sessionId] });
+    socket.broadcast.emit('draw', { x, y, color: clients[sessionId], width });
   });
 
   // stop drawing event

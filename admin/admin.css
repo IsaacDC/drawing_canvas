@@ -1,12 +1,28 @@
-#canvas {
-    box-shadow: -3px 2px 9px 6px black;
-    border: solid black 2px;
-}
-
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #f0f0f0;
+    background-color: white;
+    margin: 0px;
+}
+.iframe-container{
+    display: flex;
+    justify-content: center;
+}
+#canvas-viewer {
+    border: none;
+    width: 1000px;
+    height: 500px;
+}
+
+#canvas{
+    box-shadow: -3px 2px 9px 6px black;
+    border: solid black 2px;
+    width: 1000px;
+    height: 500px;
+    margin: 0px;
+}
+
+#data-table {
+    padding: 20px;
 }
 
 table {
@@ -28,13 +44,6 @@ th {
     background-color: #f4f4f4;
 }
 
-.collapsible {
-    cursor: pointer;
-}
-
-.content {
-    display: none;
-}
 
 .active .content {
     display: table-row-group;

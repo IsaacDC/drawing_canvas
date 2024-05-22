@@ -80,10 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.moveTo(data.x, data.y);
         ctx.strokeStyle = data.color;
         ctx.lineWidth = data.width;
+        ctx.lineCap = data.linecap;
       } else if (data.type === "draw") {
         ctx.lineTo(data.x, data.y);
         ctx.strokeStyle = data.color;
         ctx.lineWidth = data.width;
+        ctx.lineCap = data.linecap;
         ctx.stroke();
       } else if (data.type === "stop") {
         ctx.beginPath();

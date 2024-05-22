@@ -10,19 +10,24 @@
 </head>
 
 <body>
-    <div class="field">
+    <section class="canvas-container">
         <canvas id="canvas"></canvas>
+    </section>
+
+    <div class="field">
+
         <div class="tools">
             <button type="button" class="button">Undo</button>
             <button type="button" id="clear" class="button">Clear</button>
 
+            <div class="color-field" style="background: black;"></div>
             <div class="color-field" style="background: red;"></div>
             <div class="color-field" style="background: blue;"></div>
             <div class="color-field" style="background: green;"></div>
             <div class="color-field" style="background: yellow;"></div>
 
             <input type="color" id="stroke-color" name="color" value="#00000">
-            <input type="range" min="1" max="100" value="5" id="stroke-width">   
+            <input type="range" min="1" max="100" value="5" id="stroke-width">
         </div>
     </div>
 
