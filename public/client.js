@@ -5,6 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
+  canvas.width = 1280;
+  canvas.height = 720;
+
   let isDrawing = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
@@ -15,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mousedown", startDrawing);
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", stopDrawing);
+  canvas.addEventListener("mouseleave", stopDrawing);
 
   //Clears drawings
   const eraseDrawings = document.getElementById("clear");
@@ -80,12 +84,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.moveTo(data.x, data.y);
         ctx.strokeStyle = data.color;
         ctx.lineWidth = data.width;
-        ctx.lineCap = data.linecap;
+        ctx.lineCap = "round";
       } else if (data.type === "draw") {
         ctx.lineTo(data.x, data.y);
         ctx.strokeStyle = data.color;
         ctx.lineWidth = data.width;
-        ctx.lineCap = data.linecap;
+        ctx.lineCap = "round";
         ctx.stroke();
       } else if (data.type === "stop") {
         ctx.beginPath();
@@ -94,16 +98,19 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   //draws on the non-drawing client(s) screen(s)
-  socket.on("startDrawing", ({ x, y, color }) => {
+  socket.on("startDrawing", ({ x, y, color, width }) => {
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.strokeStyle = color;
-    isDrawing = true;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
   });
 
-  socket.on("draw", ({ x, y, color }) => {
+  socket.on("draw", ({ x, y, color, width }) => {
     ctx.lineTo(x, y);
     ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
     ctx.stroke();
   });
 
@@ -122,13 +129,4 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.lineWidth = width;
     }
   });
-
-
-  //resize canvas
-  const resizeCanvas = () => {
-    canvas.width = window.innerWidth - 60;
-    canvas.height = window.innerHeight - 150;
-  };
-
-  resizeCanvas();
 });

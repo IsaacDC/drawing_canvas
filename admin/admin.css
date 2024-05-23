@@ -1,24 +1,18 @@
 body {
     font-family: Arial, sans-serif;
     background-color: white;
+    padding: 20px;
     margin: 0px;
 }
-.iframe-container{
+.iframe-container, .canvas-container{
     display: flex;
     justify-content: center;
 }
-#canvas-viewer {
-    border: none;
-    width: 1000px;
-    height: 500px;
-}
 
-#canvas{
-    box-shadow: -3px 2px 9px 6px black;
-    border: solid black 2px;
-    width: 1000px;
-    height: 500px;
-    margin: 0px;
+#canvas-viewer {
+    border: 1px solid black;
+    width: 1280px;
+    height: 720px;
 }
 
 #data-table {
@@ -31,6 +25,10 @@ table {
     margin-top: 20px;
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.session-canvas{
+    border: solid black 1px;
 }
 
 th,

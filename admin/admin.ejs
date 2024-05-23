@@ -5,19 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="admin.css">
-    <link rel="stylesheet" href="/styles/reset.css">
     <title>Admin</title>
 </head>
 
 <body>
 
-    <section class="canvas-container">
-        <canvas id="canvas"></canvas>
-    </section>
-
-    <!-- <section class="iframe-container">
+    <section class="iframe-container">
         <iframe id="canvas-viewer" src="/canvas"></iframe>
-    </section> -->
+    </section>
 
 
     <section id="data-table">
@@ -43,6 +38,7 @@
             <% } %>
                 <tr>
                     <td><strong>SessionID: <%= entry.sessionID %></strong></td>
+                    <td><canvas class="session-canvas" data-session-id="<%= entry.sessionID %>"></canvas></td>
                     <td><button class="delete-btn" data-session-id="<%= entry.sessionID %>">Delete</button></td>
                 </tr>
                 <tbody class="content">
@@ -60,7 +56,6 @@
 
     </section>
 
-    <script src="../public/client.js"></script>
     <script src="admin.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </body>

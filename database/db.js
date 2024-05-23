@@ -3,7 +3,6 @@ const db = new sqlite3.Database("drawings.db");
 
 
 db.serialize(() => {
-
   // Create the drawings table
   db.run(`CREATE TABLE IF NOT EXISTS drawings (
     sessionID TEXT,
@@ -11,18 +10,20 @@ db.serialize(() => {
     x REAL,
     y REAL,
     color TEXT DEFAULT '#000000',
-    width INTEGER DEFAULT 5,
-    linecap text DEFAULT 'round'
-  )`);
+    width INTEGER DEFAULT 5
+  )`, (err) => {
+    if (err) {
+      console.error("Error creating drawings table:", err);
+    }
+  });
 });
 
 //deletes all drawings for a specific session ID
 const deleteDrawingsBySessionID = (sessionId, callback) => {
-  db.run("DELETE FROM drawings WHERE sessionID = ?", [sessionId], function(err) {
+  db.run("DELETE FROM drawings WHERE sessionID = ?", [sessionId], function (err) {
     if (err) {
-      console.error("deleteDrawingsBySessionID: " + err);
+      console.error("Error deleting drawings by session ID:", err);
       callback(false);
-      return;
     }
     callback(true);
   });
@@ -38,14 +39,18 @@ const insertDrawingData = (sessionID, data) => {
     y,
     color,
     width,
-  ]);
+  ], (err) => {
+    if (err) {
+      console.error("Error inserting drawing data:", err);
+    }
+  });
 };
 
 //gets all drawing data
 const getAllDrawingData = (callback) => {
   db.all("SELECT * FROM drawings", (err, rows) => {
     if (err) {
-      console.error("getAllDrawingData" + err);
+      console.error("Error getting all drawing data:" + err);
       return;
     }
     callback(rows);
@@ -54,13 +59,13 @@ const getAllDrawingData = (callback) => {
 
 
 //deletes all drawings
-const clearCanvas = () => {
+const clearCanvas = (callback) => {
   db.run("DELETE FROM drawings", (err) => {
     if (err) {
-      console.log(err);
-      return;
+      console.log("Error clearing canvas: ", err);
+      callback(false);
     }
-    console.log("All drawings deleted");
+    callback(true);
   });
 };
 
@@ -68,10 +73,11 @@ const clearCanvas = () => {
 const close = (callback) => {
   db.close((err) => {
     if (err) {
-      console.log(err);
-      return;
+      console.log("Error closing database: ", err);
+      callback(err);
     }
-    callback();
+    console.log("Database connection closed successfully.");
+    callback(null);
   });
 };
 

@@ -20,20 +20,20 @@ const db = require("../database/db");
 
 app.use(cookieParser());
 app.use(sessionMiddleware);
+
 app.use(express.static("public"));
 app.use(express.static("admin"));
+
 app.set("view engine", "ejs");
 app.set('views', join(__dirname, '../admin'));
 
 app.get("/canvas", (req, res) => {
   if (req.session) {
-    req.session.save(() => {
-      console.log(req.session.id + ' connected');
-    });
+    req.session.save();
+    res.sendFile(join(__dirname, "../public/index.html"));
   } else {
     res.send("Invalid session");
   }
-  res.sendFile(join(__dirname, "../public/index.html"));
 });
 
 app.get('/admin', (req, res) => {
@@ -54,7 +54,13 @@ app.delete('/delete/:sessionId', (req, res) => {
 });
 
 app.delete('/clear', (req, res) => {
-  db.clearCanvas();
+  db.clearCanvas((result) => {
+    if (result) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false });
+    }
+  });
 });
 
 const clients = {};
@@ -72,22 +78,31 @@ io.on("connection", (socket) => {
   // start drawing event
   socket.on('startDrawing', ({ x, y, width }) => {
     const data = { type: 'start', x, y, color: clients[sessionId], width };
-    db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit('startDrawing', { x, y, color: clients[sessionId], width });
+    db.insertDrawingData(sessionId, data, (err) => {
+      if (!err) {
+        socket.broadcast.emit('startDrawing', { x, y, color: clients[sessionId], width });
+      }
+    });
   });
 
   // drawing event
   socket.on('draw', ({ x, y, width }) => {
     const data = { type: 'draw', x, y, color: clients[sessionId], width };
-    db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit('draw', { x, y, color: clients[sessionId], width });
+    db.insertDrawingData(sessionId, data, (err) => {
+      if (!err) {
+        socket.broadcast.emit('draw', { x, y, color: clients[sessionId], width });
+      }
+    });
   });
 
   // stop drawing event
   socket.on('stopDrawing', () => {
     const data = { type: 'stop' };
-    db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit('stopDrawing');
+    db.insertDrawingData(sessionId, data, (err) => {
+      if (!err) {
+        socket.broadcast.emit('stopDrawing');
+      }
+    });
   });
 
   // change stroke color event
@@ -103,41 +118,30 @@ io.on("connection", (socket) => {
 
   // clear drawings event
   socket.on('clearDrawings', () => {
-    db.clearDrawings(sessionId);
-    socket.broadcast.emit('clearDrawings', sessionId);
+    db.clearDrawings(sessionId, (err) => {
+      if (!err) {
+        socket.broadcast.emit('clearDrawings', sessionId);
+      }
+    });
   });
-
   // disconnect event
   socket.on('disconnect', () => {
-    console.log(sessionId + ' disconnected');
     delete clients[sessionId];
   });
 });
 
-// Handle server shutdown gracefully
-process.on('SIGINT', () => {
-  console.log('Received SIGINT signal, shutting down...');
+// Handle server shutdown 
+const shutdown = () => {
   db.close((err) => {
     if (err) {
       console.error('Error closing SQLite database:', err);
-    } else {
-      console.log('SQLite database connection closed successfully.');
     }
     process.exit(0);
   });
-});
+};
 
-process.on('SIGTERM', () => {
-  console.log('Received SIGTERM signal, shutting down...');
-  db.close((err) => {
-    if (err) {
-      console.error('Error closing SQLite database:', err);
-    } else {
-      console.log('SQLite database connection closed successfully.');
-    }
-    process.exit(0);
-  });
-});
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 server.listen(3000, () => {
   console.log("server running at http://127.0.0.1:3000/canvas");
