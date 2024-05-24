@@ -33,17 +33,17 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.emit("changeStrokeColor", color);
   });
 
-  const colorFields = document.querySelectorAll('.color-field');
+  const colorFields = document.querySelectorAll(".color-field");
   colorFields.forEach((colorField) => {
-    colorField.addEventListener('click', () => {
+    colorField.addEventListener("click", () => {
       color = colorField.style.backgroundColor;
       socket.emit("changeStrokeColor", color);
     });
   });
 
   //change stroke width
-  const strokeWidth = document.getElementById('stroke-width');
-  strokeWidth.addEventListener('input', () => {
+  const strokeWidth = document.getElementById("stroke-width");
+  strokeWidth.addEventListener("input", () => {
     ctx.lineWidth = strokeWidth.value;
     socket.emit("changeStrokeWidth", strokeWidth.value);
   });
@@ -57,7 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.strokeStyle = color;
     ctx.lineCap = "round";
     ctx.lineWidth = strokeWidth.value;
-    socket.emit("startDrawing", { x: lastMouseX, y: lastMouseY, width: strokeWidth.value });;
+    socket.emit("startDrawing", {
+      x: lastMouseX,
+      y: lastMouseY,
+      width: strokeWidth.value,
+    });
   }
 
   //draws as mouse drags
@@ -104,6 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.strokeStyle = color;
     ctx.lineWidth = width;
     ctx.lineCap = "round";
+    isDrawing = true;
   });
 
   socket.on("draw", ({ x, y, color, width }) => {
@@ -119,12 +124,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.beginPath();
   });
 
-
   socket.on("changeStrokeColor", ({ sessionId, color }) => {
     clients[sessionId] = color;
   });
 
-  socket.on('changeStrokeWidth', ({ socketId, width }) => {
+  socket.on("changeStrokeWidth", ({ socketId, width }) => {
     if (socketId !== socket.id) {
       ctx.lineWidth = width;
     }
