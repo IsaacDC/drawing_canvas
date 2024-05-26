@@ -1,29 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
     <title>Canvas</title>
-</head>
+  </head>
 
-<body>
-    <canvas id="canvas"></canvas>
+  <body>
+      <canvas id="canvas"></canvas>
 
     <div class="tools">
-        <button type="button" id="clear" class="button">Clear</button>
+      <button type="button" id="clear" class="button">Clear</button>
 
-        <div class="color-field" style="background: black;"></div>
-        <div class="color-field" style="background: gold;"></div>
-        <div class="color-field" style="background: blue;"></div>
+      <button
+        type="button"
+        class="color-field"
+        aria-label="Color field"
+        data-color="blue"
+      ></button>
+      <button
+        type="button"
+        class="color-field"
+        aria-label="Color field"
+        data-color="gold"
+      ></button>
+      <button
+        type="button"
+        class="color-field"
+        aria-label="Color field"
+        data-color="black"
+      ></button>
 
-        <input type="color" id="stroke-color" name="color" value="#00000">
-        <input type="range" min="1" max="100" value="5" id="stroke-width">
+      <input
+        title="color-picker"
+        type="color"
+        id="stroke-color"
+        name="color"
+        value="#00000"
+      />
+      <input
+        title="width-slider"
+        type="range"
+        min="1"
+        max="100"
+        value="5"
+        id="stroke-width"
+      />
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="client.js"></script>
-</body>
-
+  </body>
 </html>

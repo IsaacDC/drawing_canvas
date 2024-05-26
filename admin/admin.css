@@ -1,48 +1,75 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: white;
-    padding: 20px;
-    margin: 0px;
+  font-family: Arial, sans-serif;
+  background-color: white;
+  padding: 20px;
+  margin: 0px;
 }
-.iframe-container{
-    display: flex;
-    justify-content: center;
+.iframe-container {
+  display: flex;
+  justify-content: center;
 }
 
 #canvas-viewer {
-    border: 1px solid black;
-    width: 1280px;
-    height: 720px;
+  border: 1px solid black;
+  width: 1320px;
+  height: 720px;
 }
 
-#data-table {
-    padding: 20px;
+.session-canvas {
+  border: solid black 1px;
+  width: 320px;
+  height: 180px;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.session-canvas{
-    border: solid black 1px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 th,
 td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
 th {
-    background-color: #f4f4f4;
+  background-color: #4c75af;
+  color: white;
 }
 
+th:first-child,
+td:first-child {
+  width: 20%;
+}
 
-.active .content {
-    display: table-row-group;
+th:nth-child(2),
+td:nth-child(2) {
+  width: 60%;
+}
+
+th:last-child,
+td:last-child {
+  width: 20%;
+  text-align: center;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+.delete-btn, .ban-btn {
+  background-color: #f44336;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f;
 }

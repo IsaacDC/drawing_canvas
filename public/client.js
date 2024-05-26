@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const colorFields = document.querySelectorAll(".color-field");
   colorFields.forEach((colorField) => {
     colorField.addEventListener("click", () => {
-      color = colorField.style.backgroundColor;
+      color = colorField.getAttribute('data-color');
       socket.emit("changeStrokeColor", color);
     });
   });

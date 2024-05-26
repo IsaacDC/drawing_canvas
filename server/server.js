@@ -29,8 +29,17 @@ app.set("views", join(__dirname, "../admin"));
 
 app.get("/canvas", (req, res) => {
   if (req.session) {
-    req.session.save();
-    res.sendFile(join(__dirname, "../public/index.html"));
+    db.isSessionIDBanned(req.session.id, (err, isBanned) => {
+      if (err) {
+        console.error('Error checking if sessionID is banned:', err);
+        res.status(500).send('Server error');
+      } else if (isBanned) {
+        res.status(403).send('Access denied');
+      } else {
+        req.session.save();
+        res.sendFile(join(__dirname, "../public/index.html"));
+      }
+    });
   } else {
     res.send("Invalid session");
   }
@@ -49,6 +58,27 @@ app.delete("/delete/:sessionId", (req, res) => {
       res.json({ success: true });
     } else {
       res.json({ success: false });
+    }
+  });
+});
+
+app.post("/ban/:sessionId", (req, res) => {
+  const sessionId = req.params.sessionId;
+  db.isSessionIDBanned(sessionId, (err, isBanned) => {
+    if (err) {
+      console.error('Error checking if sessionID is banned:', err);
+      res.status(500).json({ success: false, message: 'Server error' });
+    } else if (isBanned) {
+      res.json({ success: false, message: 'Session ID already banned' });
+    } else {
+      db.banSessionID(sessionId, (err) => {
+        if (err) {
+          console.error('Error banning sessionID:', err);
+          res.status(500).json({ success: false, message: 'Server error' });
+        } else {
+          res.json({ success: true });
+        }
+      });
     }
   });
 });

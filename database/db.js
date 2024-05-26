@@ -1,49 +1,63 @@
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("drawings.db");
 
-
 db.serialize(() => {
   // Create the drawings table
-  db.run(`CREATE TABLE IF NOT EXISTS drawings (
+  db.run(
+    `CREATE TABLE IF NOT EXISTS drawings (
     sessionID TEXT,
     type TEXT,
     x REAL,
     y REAL,
     color TEXT DEFAULT '#000000',
     width INTEGER DEFAULT 5
-  )`, (err) => {
-    if (err) {
-      console.error("Error creating drawings table:", err);
+  )`,
+    (err) => {
+      if (err) {
+        console.error("Error creating drawings table:", err);
+      }
     }
-  });
+  );
+
+  db.run(
+    `CREATE TABLE IF NOT EXISTS bannedSessionIDs (
+    sessionID TEXT
+  )`,
+    (err) => {
+      if (err) {
+        console.error("Error creating bannedSessionIDs table:", err);
+      }
+    }
+  );
 });
 
 //deletes all drawings for a specific session ID
 const deleteDrawingsBySessionID = (sessionId, callback) => {
-  db.run("DELETE FROM drawings WHERE sessionID = ?", [sessionId], function (err) {
-    if (err) {
-      console.error("Error deleting drawings by session ID:", err);
-      callback(false);
+  db.run(
+    "DELETE FROM drawings WHERE sessionID = ?",
+    [sessionId],
+    function (err) {
+      if (err) {
+        console.error("Error deleting drawings by session ID:", err);
+        callback(false);
+      }
+      callback(true);
     }
-    callback(true);
-  });
+  );
 };
 
 //insert drawing data
 const insertDrawingData = (sessionID, data) => {
   const { type, x, y, color, width } = data;
-  db.run("INSERT INTO drawings (sessionID, type, x, y, color, width) VALUES (?, ?, ?, ?, ?, ?)", [
-    sessionID,
-    type,
-    x,
-    y,
-    color,
-    width,
-  ], (err) => {
-    if (err) {
-      console.error("Error inserting drawing data:", err);
+  db.run(
+    "INSERT INTO drawings (sessionID, type, x, y, color, width) VALUES (?, ?, ?, ?, ?, ?)",
+    [sessionID, type, x, y, color, width],
+    (err) => {
+      if (err) {
+        console.error("Error inserting drawing data:", err);
+      }
     }
-  });
+  );
 };
 
 //gets all drawing data
@@ -57,7 +71,6 @@ const getAllDrawingData = (callback) => {
   });
 };
 
-
 //deletes all drawings
 const clearCanvas = (callback) => {
   db.run("DELETE FROM drawings", (err) => {
@@ -68,6 +81,42 @@ const clearCanvas = (callback) => {
     callback(true);
   });
 };
+
+// Add a new banned sessionID
+function banSessionID(sessionID, callback) {
+  const query = "INSERT INTO bannedSessionsIDs (sessionID) VALUES (?)";
+  db.run(query, [sessionID], (err) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null);
+    }
+  });
+}
+
+// Check if a sessionID is banned
+function isSessionIDBanned(sessionID, callback) {
+  const query = "SELECT * FROM bannedSessionIDs WHERE sessionID = ?";
+  db.get(query, [sessionID], (err, row) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null, !!row);
+    }
+  });
+}
+
+// Remove a banned sessionID
+function removeBannedSessionID(sessionID, callback) {
+  const query = "DELETE FROM bannedSessionIDs WHERE sessionID = ?";
+  db.run(query, [sessionID], (err) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null);
+    }
+  });
+}
 
 //closes connection to database
 const close = (callback) => {
@@ -86,6 +135,8 @@ module.exports = {
   getAllDrawingData,
   clearCanvas,
   close,
-  deleteDrawingsBySessionID
+  deleteDrawingsBySessionID,
+  banSessionID,
+  isSessionIDBanned,
+  removeBannedSessionID,
 };
-
