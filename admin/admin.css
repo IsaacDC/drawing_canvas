@@ -1,11 +1,17 @@
 body {
   font-family: Arial, sans-serif;
   background-color: white;
-  padding: 20px;
-  margin: 0px;
+  padding: 0;
+  margin: 0;
 }
+
+canvas {
+  margin: 10px;
+  border: 1px solid black;
+}
+
 .iframe-container {
-  display: flex;
+  display: none;
   justify-content: center;
 }
 
@@ -24,7 +30,7 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin:20px 10px 20px 10px;
   background-color: #fff;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }

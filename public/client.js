@@ -13,6 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastMouseY = 0;
   let color;
   const clients = {};
+  let mode = "pencil";
+
+  document.getElementById("pencil").addEventListener("click", function () {
+    mode = "pencil";
+  });
+
+  document.getElementById("eraser").addEventListener("click", function () {
+    mode = "eraser";
+  });
 
   // mouse events
   canvas.addEventListener("mousedown", startDrawing);
@@ -21,9 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mouseleave", stopDrawing);
 
   //Clears drawings
-  const eraseDrawings = document.getElementById("clear");
-  eraseDrawings.addEventListener("click", () => {
-    socket.emit("clearDrawings");
+  const clearDrawings = document.getElementById("clear-all");
+  clearDrawings.addEventListener("click", () => {
+    if (confirm('Are you sure you want to clear all drawings?')) {
+      location.reload();
+      socket.emit("clearDrawings");
+    }
   });
 
   //updates stroke color
@@ -52,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function startDrawing(e) {
     isDrawing = true;
     [lastMouseX, lastMouseY] = [e.offsetX, e.offsetY];
+
     ctx.beginPath();
     ctx.moveTo(lastMouseX, lastMouseY);
     ctx.strokeStyle = color;
@@ -64,16 +77,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  //draws as mouse drags
   function draw(e) {
     if (!isDrawing) return;
+
     ctx.lineTo(e.offsetX, e.offsetY);
     ctx.stroke();
     socket.emit("draw", { x: e.offsetX, y: e.offsetY });
+
+    // if (mode === "pen") {
+    //   ctx.globalCompositeOperation = "source-over";
+    //   ctx.lineTo(e.offsetX, e.offsetY);
+    //   ctx.stroke();
+    //   socket.emit("draw", { x: e.offsetX, y: e.offsetY, mode: "pen" });
+    // } else if (mode === "eraser") {
+    //   ctx.globalCompositeOperation = "destination-out";
+    //   ctx.beginPath();
+    //   ctx.arc(e.offsetX, e.offsetY, 10, 0, Math.PI * 2);
+    //   ctx.fill();
+    //   socket.emit("draw", { x: e.offsetX, y: e.offsetY, mode: "eraser" });
+    // }
+
     [lastMouseX, lastMouseY] = [e.offsetX, e.offsetY];
   }
 
-  //stops drawing when mouse up
   function stopDrawing() {
     isDrawing = false;
     ctx.beginPath();
@@ -82,6 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Incoming socket events
   socket.on("loadDrawingData", (drawingData) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     drawingData.forEach((data) => {
       if (data.type === "start") {
         ctx.beginPath();
@@ -97,7 +125,13 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.stroke();
       } else if (data.type === "stop") {
         ctx.beginPath();
-      }
+      } 
+      // else if (data.type === "erase") {
+      //   ctx.globalCompositeOperation = "destination-out";
+      //   ctx.beginPath();
+      //   ctx.arc(data.x, data.y, data.eraserRadius, 0, Math.PI * 2);
+      //   ctx.fill();
+      // }
     });
   });
 
@@ -118,6 +152,20 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.lineCap = "round";
     ctx.stroke();
   });
+  // socket.on("draw", ({ x, y, color, width, mode, eraserRadius }) => {
+  //   if (mode === "pen") {
+  //     ctx.lineTo(x, y);
+  //     ctx.strokeStyle = color;
+  //     ctx.lineWidth = width;
+  //     ctx.lineCap = "round";
+  //     ctx.stroke();
+  //   } else if (mode === "eraser") {
+  //     ctx.globalCompositeOperation = "destination-out";
+  //     ctx.beginPath();
+  //     ctx.arc(x, y, eraserRadius, 0, Math.PI * 2);
+  //     ctx.fill();
+  //   }
+  // });
 
   socket.on("stopDrawing", () => {
     isDrawing = false;

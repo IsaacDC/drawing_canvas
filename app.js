@@ -2,7 +2,7 @@ const express = require("express");
 const { Server } = require("socket.io");
 const cookieParser = require("cookie-parser");
 
-const { sessionMiddleware, wrap } = require("../server/sessionStore");
+const { sessionMiddleware, wrap } = require("./server/sessionStore");
 
 const { createServer } = require("node:http");
 const { join } = require("node:path");
@@ -16,7 +16,7 @@ const io = new Server(server, {
   },
 });
 
-const db = require("../database/db");
+const db = require("./database/db");
 
 app.use(cookieParser());
 app.use(sessionMiddleware);
@@ -25,7 +25,7 @@ app.use(express.static("public"));
 app.use(express.static("admin"));
 
 app.set("view engine", "ejs");
-app.set("views", join(__dirname, "../admin"));
+app.set("views", join(__dirname, "./admin"));
 
 app.get("/canvas", (req, res) => {
   if (req.session) {
@@ -37,7 +37,7 @@ app.get("/canvas", (req, res) => {
         res.status(403).send("Access denied");
       } else {
         req.session.save();
-        res.sendFile(join(__dirname, "../public/index.html"));
+        res.sendFile(join(__dirname, "./public/index.html"));
       }
     });
   } else {
@@ -135,12 +135,15 @@ io.on("connection", (socket) => {
 
   // clear drawings event
   socket.on("clearDrawings", () => {
-    db.clearDrawings(sessionId, (err) => {
+    db.deleteDrawingsBySessionID(sessionId, (err) => {
       if (!err) {
-        socket.broadcast.emit("clearDrawings", sessionId);
+        db.getAllDrawingData((drawingData) => {
+          socket.broadcast.emit("loadDrawingData", drawingData);
+        });
       }
-    });
+    })
   });
+
   // disconnect event
   socket.on("disconnect", () => {
     delete clients[sessionId];
@@ -161,5 +164,5 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 server.listen(3000, () => {
-  console.log("server running at http://127.0.0.1:3000/canvas");
+  console.log("Server running at http://127.0.0.1:3000/canvas");
 });

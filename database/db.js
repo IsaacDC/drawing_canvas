@@ -93,9 +93,8 @@ function banSessionID(sessionID, callback) {
       } else {
         callback(null);
       }
-    }
-  );
-}
+    });
+};
 
 // Check if a sessionID is banned
 function isSessionIDBanned(sessionID, callback) {
@@ -108,9 +107,8 @@ function isSessionIDBanned(sessionID, callback) {
       } else {
         callback(null, !!row);
       }
-    }
-  );
-}
+    });
+};
 
 // Remove a banned sessionID
 function removeBannedSessionID(sessionID, callback) {
@@ -123,8 +121,7 @@ function removeBannedSessionID(sessionID, callback) {
       } else {
         callback(null);
       }
-    }
-  );
+    });
 }
 
 //closes connection to database

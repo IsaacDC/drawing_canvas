@@ -1,55 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Canvas</title>
-  </head>
 
-  <body>
-      <canvas id="canvas"></canvas>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Canvas</title>
+</head>
 
-    <div class="tools">
-      <button type="button" id="clear" class="button">Clear</button>
+<body>
+  <canvas id="canvas"></canvas>
 
-      <button
-        type="button"
-        class="color-field"
-        aria-label="Color field"
-        data-color="blue"
-      ></button>
-      <button
-        type="button"
-        class="color-field"
-        aria-label="Color field"
-        data-color="gold"
-      ></button>
-      <button
-        type="button"
-        class="color-field"
-        aria-label="Color field"
-        data-color="black"
-      ></button>
+  <div class="tools">
+    <button type="button" id="clear-all">Clear All</button>
 
-      <input
-        title="color-picker"
-        type="color"
-        id="stroke-color"
-        name="color"
-        value="#00000"
-      />
-      <input
-        title="width-slider"
-        type="range"
-        min="1"
-        max="100"
-        value="5"
-        id="stroke-width"
-      />
+    <button type="button" id="pencil">Pencil</button>
+    <button type="button" id="eraser">Eraser</button>
+
+    <div>
+      <button type="button" class="color-field" aria-label="Color field" data-color="blue"></button>
+      <button type="button" class="color-field" aria-label="Color field" data-color="gold"></button>
+      <button type="button" class="color-field" aria-label="Color field" data-color="black"></button>
     </div>
 
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="client.js"></script>
-  </body>
+    <input title="color-picker" type="color" id="stroke-color" name="color" value="#00000" />
+    <input title="width-slider" type="range" min="1" max="100" value="5" id="stroke-width" />
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="client.js"></script>
+</body>
+
 </html>

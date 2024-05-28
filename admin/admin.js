@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
   const socket = io.connect("http://127.0.0.1:3000");
 
+  canvas.width = 1280;
+  canvas.height = 720;
+
   // function login() {
   //     let username = "";
   //     let password = "";
