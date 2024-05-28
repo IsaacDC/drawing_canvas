@@ -84,38 +84,47 @@ const clearCanvas = (callback) => {
 
 // Add a new banned sessionID
 function banSessionID(sessionID, callback) {
-  const query = "INSERT INTO bannedSessionsIDs (sessionID) VALUES (?)";
-  db.run(query, [sessionID], (err) => {
-    if (err) {
-      callback(err);
-    } else {
-      callback(null);
+  db.run(
+    "INSERT INTO bannedSessionsIDs (sessionID) VALUES (?)",
+    [sessionID],
+    (err) => {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null);
+      }
     }
-  });
+  );
 }
 
 // Check if a sessionID is banned
 function isSessionIDBanned(sessionID, callback) {
-  const query = "SELECT * FROM bannedSessionIDs WHERE sessionID = ?";
-  db.get(query, [sessionID], (err, row) => {
-    if (err) {
-      callback(err);
-    } else {
-      callback(null, !!row);
+  db.get(
+    "SELECT * FROM bannedSessionIDs WHERE sessionID = ?",
+    [sessionID],
+    (err, row) => {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, !!row);
+      }
     }
-  });
+  );
 }
 
 // Remove a banned sessionID
 function removeBannedSessionID(sessionID, callback) {
-  const query = "DELETE FROM bannedSessionIDs WHERE sessionID = ?";
-  db.run(query, [sessionID], (err) => {
-    if (err) {
-      callback(err);
-    } else {
-      callback(null);
+  db.run(
+    "DELETE FROM bannedSessionIDs WHERE sessionID = ?",
+    [sessionID],
+    (err) => {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null);
+      }
     }
-  });
+  );
 }
 
 //closes connection to database

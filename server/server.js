@@ -31,10 +31,10 @@ app.get("/canvas", (req, res) => {
   if (req.session) {
     db.isSessionIDBanned(req.session.id, (err, isBanned) => {
       if (err) {
-        console.error('Error checking if sessionID is banned:', err);
-        res.status(500).send('Server error');
+        console.error("Error checking if sessionID is banned:", err);
+        res.status(500).send("Server error");
       } else if (isBanned) {
-        res.status(403).send('Access denied');
+        res.status(403).send("Access denied");
       } else {
         req.session.save();
         res.sendFile(join(__dirname, "../public/index.html"));
@@ -64,21 +64,12 @@ app.delete("/delete/:sessionId", (req, res) => {
 
 app.post("/ban/:sessionId", (req, res) => {
   const sessionId = req.params.sessionId;
-  db.isSessionIDBanned(sessionId, (err, isBanned) => {
+  db.banSessionID(sessionId, (err) => {
     if (err) {
-      console.error('Error checking if sessionID is banned:', err);
-      res.status(500).json({ success: false, message: 'Server error' });
-    } else if (isBanned) {
-      res.json({ success: false, message: 'Session ID already banned' });
+      console.error("Error banning sessionID:", err);
+      res.status(500).json({ success: false, message: "Server error" });
     } else {
-      db.banSessionID(sessionId, (err) => {
-        if (err) {
-          console.error('Error banning sessionID:', err);
-          res.status(500).json({ success: false, message: 'Server error' });
-        } else {
-          res.json({ success: true });
-        }
-      });
+      res.json({ success: true });
     }
   });
 });
