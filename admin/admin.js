@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   const socket = io.connect("http://127.0.0.1:3000");
 
-  canvas.width = 1280;
-  canvas.height = 720;
+  const db = require("./database/db");
 
   // function login() {
   //     let username = "";
@@ -32,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // login();
 
+  //loads drawings for each canvas per session respectfully
   function renderDrawings() {
     socket.on("loadDrawingData", (drawingData) => {
       const sessionCanvases = document.querySelectorAll(".session-canvas");
@@ -64,37 +64,27 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.beginPath();
           }
         });
-      });
-    });
+      })
+    })
   }
 
   renderDrawings();
 
-  //Displays Database in admin page in table format
-  fetch("/admin")
-    .then((response) => response.json())
-    .then((data) => {
-      const tableBody = document.getElementById("data-table-body");
-
-      data.forEach((entry) => {
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-                        <td>${entry.id}</td>
-                        <td>${entry.sessionID}</td>
-                        <td>${entry.type}</td>
-                        <td>${entry.x}</td>
-                        <td>${entry.y}</td>
-                        <td>${entry.color}</td>
-                        <td>${entry.width}</td>
-                    `;
-
-        tableBody.appendChild(row);
+  function fetchAndRenderDrawings() {
+    fetch("/admin/data")
+      .then((response) => response.json())
+      .then((data) => {
+        renderDrawings(data);
+        renderTable(data);
+      })
+      .catch((error) => {
+        console.log(error);
       });
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  }
+
+  document.getElementById("refresh-table").addEventListener("click", fetchAndRenderDrawings);
+
+  fetchAndRenderDrawings();
 
   //Clears Canvas of all drawings
   const clearCanvas = document.getElementById("clear-canvas");
@@ -168,3 +158,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+

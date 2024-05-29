@@ -136,6 +136,16 @@ const close = (callback) => {
   });
 };
 
+function uniqueSessionIds (callback) {
+  db.all('SELECT DISTINCT sessionID FROM drawings', (err, rows) => {
+    if (err) {
+      console.log("Error getting unique sessionIds: " + err)
+      return;
+    }
+    callback(rows);
+  });
+}
+
 module.exports = {
   insertDrawingData,
   getAllDrawingData,
@@ -145,4 +155,5 @@ module.exports = {
   banSessionID,
   isSessionIDBanned,
   removeBannedSessionID,
+  uniqueSessionIds,
 };

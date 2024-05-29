@@ -1,3 +1,7 @@
+html, body{
+  height: 100%;
+  overflow-y: hidden ;
+}
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -14,8 +18,8 @@ canvas {
   flex-direction: row;
   gap: 10px;
   margin: 10px;
-  position: sticky;
-  width: 100%;
+  position: sticky ;
+  left: 10px;
 }
 
 #clear-all, #pencil {

@@ -5,20 +5,15 @@ body {
   margin: 0;
 }
 
-canvas {
-  margin: 10px;
-  border: 1px solid black;
-}
-
 .iframe-container {
-  display: none;
+  display: flex;
   justify-content: center;
 }
 
 #canvas-viewer {
-  border: 1px solid black;
-  width: 1320px;
-  height: 720px;
+  border-style: none;
+  width: 1330px;
+  height: 820px;
 }
 
 .session-canvas {
@@ -30,8 +25,8 @@ canvas {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin:20px 10px 20px 10px;
-  background-color: #fff;
+  margin: 20px 10px 20px 10px;
+  background-color: #ffffff;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -39,7 +34,7 @@ th,
 td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #ffffff;
 }
 
 th {
@@ -67,7 +62,8 @@ tr:hover {
   background-color: #f5f5f5;
 }
 
-.delete-btn, .ban-btn {
+.delete-btn,
+.ban-btn {
   background-color: #f44336;
   color: white;
   padding: 8px 16px;
@@ -76,6 +72,7 @@ tr:hover {
   cursor: pointer;
 }
 
-.delete-btn:hover {
+.delete-btn:hover,
+.ban-btn:hover {
   background-color: #d32f2f;
 }

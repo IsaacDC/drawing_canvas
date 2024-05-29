@@ -51,6 +51,12 @@ app.get("/admin", (req, res) => {
   });
 });
 
+app.get('/admin/sessions', (req, res) => {
+  db.uniqueSessionIds((sessionIds) => {
+    res.json(sessionIds);
+  });
+});
+
 app.delete("/delete/:sessionId", (req, res) => {
   const sessionId = req.params.sessionId;
   db.deleteDrawingsBySessionID(sessionId, (result) => {
