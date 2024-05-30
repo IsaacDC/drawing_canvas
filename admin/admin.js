@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const socket = io.connect("http://127.0.0.1:3000");
 
-  const db = require("./database/db");
-
   // function login() {
   //     let username = "";
   //     let password = "";
@@ -64,27 +62,35 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.beginPath();
           }
         });
-      })
-    })
+      });
+    });
   }
-
   renderDrawings();
 
-  function fetchAndRenderDrawings() {
-    fetch("/admin/data")
+  function fetchData() {
+    fetch("/admin/sessions")
       .then((response) => response.json())
       .then((data) => {
-        renderDrawings(data);
-        renderTable(data);
+        const table = document.getElementById("data-table");
+
+        data.forEach((entry) => {
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+                        <td>${entry.sessionID}</td>
+                    `;
+
+          table.appendChild(row);
+        });
       })
       .catch((error) => {
         console.log(error);
       });
   }
 
-  document.getElementById("refresh-table").addEventListener("click", fetchAndRenderDrawings);
+  fetchData();
 
-  fetchAndRenderDrawings();
+  document.getElementById("refresh-table").addEventListener("click", fetchData);
 
   //Clears Canvas of all drawings
   const clearCanvas = document.getElementById("clear-canvas");
@@ -158,4 +164,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
-
