@@ -96,8 +96,6 @@ io.use(wrap(sessionMiddleware));
 io.on("connection", (socket) => {
   const sessionId = socket.request.session.id;
 
-  clients[sessionId] = "#000000";
-
   db.getAllDrawingData((drawingData) => {
     socket.emit("loadDrawingData", drawingData);
   });
@@ -126,6 +124,10 @@ io.on("connection", (socket) => {
     const data = { type: "stop" };
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("stopDrawing");
+  });
+
+  socket.on("drawingData", (data) => {
+    db.insertDrawingData(sessionId, data);
   });
 
   // change stroke color event

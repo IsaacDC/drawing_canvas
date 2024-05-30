@@ -22,8 +22,9 @@ canvas {
   left: 10px;
 }
 
-#clear-all, #pencil {
-  padding: 8px 16px;
+#clear-all {
+  width: 3em;
+  height: 2em;
   font-size: 16px;
   cursor: pointer;
 }

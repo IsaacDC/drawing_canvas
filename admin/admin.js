@@ -67,30 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   renderDrawings();
 
-  function fetchData() {
-    fetch("/admin/sessions")
-      .then((response) => response.json())
-      .then((data) => {
-        const table = document.getElementById("data-table");
-
-        data.forEach((entry) => {
-          const row = document.createElement("tr");
-
-          row.innerHTML = `
-                        <td>${entry.sessionID}</td>
-                    `;
-
-          table.appendChild(row);
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
-  fetchData();
-
-  document.getElementById("refresh-table").addEventListener("click", fetchData);
 
   //Clears Canvas of all drawings
   const clearCanvas = document.getElementById("clear-canvas");

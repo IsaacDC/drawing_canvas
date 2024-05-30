@@ -5,13 +5,22 @@ body {
   margin: 0;
 }
 
+button {
+  background-color: #f44336;
+}
+
+button:hover {
+  background-color: #d32f2f;
+
+}
+
 .iframe-container {
   display: flex;
   justify-content: center;
 }
 
 #canvas-viewer {
-  border-style: none;
+  border: 1px solid rgba(76, 117, 175, 0.2);
   width: 1330px;
   height: 820px;
 }
@@ -20,6 +29,16 @@ body {
   border: solid black 1px;
   width: 320px;
   height: 180px;
+}
+
+#clear-canvas {
+  color: white;
+  padding: 10px 20px;
+  margin: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
 table {
@@ -38,7 +57,7 @@ td {
 }
 
 th {
-  background-color: #4c75af;
+  background-color: rgb(76, 117, 175);
   color: white;
 }
 
@@ -64,7 +83,6 @@ tr:hover {
 
 .delete-btn,
 .ban-btn {
-  background-color: #f44336;
   color: white;
   padding: 8px 16px;
   border: none;
@@ -72,7 +90,3 @@ tr:hover {
   cursor: pointer;
 }
 
-.delete-btn:hover,
-.ban-btn:hover {
-  background-color: #d32f2f;
-}

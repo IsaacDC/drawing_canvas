@@ -12,8 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let isDrawing = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
-  let color;
   const clients = {};
+  var color;
 
   // mouse events
   canvas.addEventListener("mousedown", startDrawing);
@@ -58,14 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.emit("changeStrokeWidth", strokeWidth.value);
   });
 
-  //begins the drawing process (when mouse down)
+  //begins the drawing process
   function startDrawing(e) {
     e.preventDefault();
     isDrawing = true;
-  
+
     const rect = canvas.getBoundingClientRect();
     let x, y;
-  
+
     // Handle mouse events
     if (e.type.startsWith("mouse")) {
       [x, y] = [e.offsetX, e.offsetY];
@@ -75,9 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const touch = e.touches[0];
       [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
     }
-  
+
     [lastMouseX, lastMouseY] = [x, y];
-  
+
     ctx.beginPath();
     ctx.moveTo(lastMouseX, lastMouseY);
     ctx.strokeStyle = color;
@@ -89,30 +89,30 @@ document.addEventListener("DOMContentLoaded", () => {
       width: strokeWidth.value,
     });
   }
-  
+
   function draw(e) {
     if (!isDrawing) return;
     e.preventDefault();
-  
+
     const rect = canvas.getBoundingClientRect();
     let x, y;
-  
-    // Handle mouse events
+
+    // mouse events
     if (e.type.startsWith("mouse")) {
       [x, y] = [e.offsetX, e.offsetY];
     }
-    // Handle touch events
+    // touch events
     else {
       const touch = e.touches[0];
       [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
     }
-  
+
     ctx.lineTo(x, y);
     ctx.stroke();
     socket.emit("draw", { x, y });
     [lastMouseX, lastMouseY] = [x, y];
   }
-  
+
   function stopDrawing(e) {
     if (!isDrawing) return;
     e.preventDefault();
