@@ -27,7 +27,7 @@ app.use(express.static("admin"));
 app.set("view engine", "ejs");
 app.set("views", join(__dirname, "./admin"));
 
-app.get("/canvas", (req, res) => {
+app.get("/", (req, res) => {
   if (req.session) {
     db.isSessionIDBanned(req.session.id, (err, isBanned) => {
       if (err) {
@@ -172,5 +172,5 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 server.listen(3000, () => {
-  console.log("Server running at http://127.0.0.1:3000/canvas");
+  console.log("Server running at http://127.0.0.1:3000");
 });

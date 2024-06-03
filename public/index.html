@@ -1,70 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <title>Canvas</title>
-  </head>
 
-  <body>
-    <canvas id="canvas"></canvas>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <title>Canvas</title>
+</head>
 
-    <div class="tools">
-      <button type="button" id="clear-all" class="fa-solid fa-trash"></button>
-      <button
-        type="button"
-        id="undo"
-        class="fa-solid fa-arrow-rotate-left"
-      ></button>
+<body>
+  <canvas id="canvas"></canvas>
 
-      <div>
-        <button
-          type="button"
-          class="color-field"
-          aria-label="Color field"
-          data-color="blue"
-        ></button>
-        <button
-          type="button"
-          class="color-field"
-          aria-label="Color field"
-          data-color="gold"
-        ></button>
-        <button
-          type="button"
-          class="color-field"
-          aria-label="Color field"
-          data-color="black"
-        ></button>
-      </div>
+  <div class="tools">
+    <button id="clear-all" class="fa-solid fa-trash"></button>
+    <!-- <button id="eraser" class="fa-solid fa-eraser"></button> -->
 
-      <input
-        title="color-picker"
-        type="color"
-        id="stroke-color"
-        name="color"
-        value="#00000"
-      />
-      <input
-        title="width-slider"
-        type="range"
-        min="1"
-        max="100"
-        value="5"
-        id="stroke-width"
-      />
+    <div>
+      <button type="button" class="color-field" aria-label="Color field" data-color="blue"></button>
+      <button type="button" class="color-field" aria-label="Color field" data-color="gold"></button>
+      <button type="button" class="color-field" aria-label="Color field" data-color="black"></button>
     </div>
 
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="client.js"></script>
-  </body>
+    <input title="color-picker" type="color" id="stroke-color" name="color" value="#00000" />
+    <input title="width-slider" type="range" min="1" max="100" value="5" id="stroke-width" />
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="client.js"></script>
+</body>
+
 </html>

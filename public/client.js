@@ -66,11 +66,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const rect = canvas.getBoundingClientRect();
     let x, y;
 
-    // Handle mouse events
+    //  mouse events
     if (e.type.startsWith("mouse")) {
       [x, y] = [e.offsetX, e.offsetY];
     }
-    // Handle touch events
+    //  touch events
     else {
       const touch = e.touches[0];
       [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
