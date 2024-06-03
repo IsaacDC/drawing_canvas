@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.height = 720;
 
   let isDrawing = false;
+  let isErasing = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
   const clients = {};
@@ -34,6 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
       location.reload();
       socket.emit("clearDrawings");
     }
+  });
+
+  const eraseToggle = document.getElementById("eraser");
+  eraseToggle.addEventListener("click", () => {
+    isErasing = !isErasing;
   });
 
   //updates stroke color
@@ -66,11 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const rect = canvas.getBoundingClientRect();
     let x, y;
 
-    //  mouse events
+    // Mouse events
     if (e.type.startsWith("mouse")) {
       [x, y] = [e.offsetX, e.offsetY];
     }
-    //  touch events
+    // Touch events
     else {
       const touch = e.touches[0];
       [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
@@ -80,13 +86,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.beginPath();
     ctx.moveTo(lastMouseX, lastMouseY);
-    ctx.strokeStyle = color;
+
+    if (isErasing) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+    } else {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = color;
+    }
+
     ctx.lineCap = "round";
     ctx.lineWidth = strokeWidth.value;
+
     socket.emit("startDrawing", {
       x: lastMouseX,
       y: lastMouseY,
       width: strokeWidth.value,
+      isErasing,
     });
   }
 
@@ -107,9 +123,17 @@ document.addEventListener("DOMContentLoaded", () => {
       [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
     }
 
+    if (isErasing) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.strokeStyle = "rgba(0, 0, 0, 0)";
+    } else {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = color;
+    }
+
     ctx.lineTo(x, y);
     ctx.stroke();
-    socket.emit("draw", { x, y });
+    socket.emit("draw", { x, y, isErasing });
     [lastMouseX, lastMouseY] = [x, y];
   }
 
@@ -145,16 +169,32 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   //draws on the non-drawing client(s) screen(s)
-  socket.on("startDrawing", ({ x, y, color, width }) => {
+  socket.on("startDrawing", ({ x, y, color, width, isErasing }) => {
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.strokeStyle = color;
     ctx.lineWidth = width;
     ctx.lineCap = "round";
+
+    if (isErasing) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.strokeStyle = "rgba(0, 0, 0, 1)"; 
+    } else {
+      ctx.globalCompositeOperation = "source-over";n
+    }
+
     isDrawing = true;
   });
 
-  socket.on("draw", ({ x, y, color, width }) => {
+  socket.on("draw", ({ x, y, color, width, isErasing }) => {
+    if (isErasing) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.strokeStyle = "rgba(0, 0, 0, 1)"; 
+    } else {
+      ctx.globalCompositeOperation = "source-over"; 
+      ctx.strokeStyle = color;
+    }
+
     ctx.lineTo(x, y);
     ctx.strokeStyle = color;
     ctx.lineWidth = width;

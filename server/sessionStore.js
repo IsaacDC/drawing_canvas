@@ -2,11 +2,11 @@ const session = require("express-session");
 const Redis = require("ioredis");
 const RedisStore = require("connect-redis").default;
 const { v4: uuidv4 } = require("uuid");
-const config = require("./config");
+const redisConfig = require("./config");
 
 const redisClient = new Redis({
-  host: config.redis.host,
-  port: config.redis.port,
+  host: redisConfig.host,
+  port: redisConfig.port,
 });
 redisClient.on("error", function (err) {
   console.log("Could not establish a connection to Redis" + err);

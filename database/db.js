@@ -1,48 +1,52 @@
-const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database("drawings.db");
+const mysql = require("mysql2");
 
-db.serialize(() => {
-  // Create the drawings table
-  db.run(
-    `CREATE TABLE IF NOT EXISTS drawings (
+const pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "Ironheat1",
+  database: "drawings_app",
+});
+
+pool.query(
+  `CREATE TABLE IF NOT EXISTS drawings (
     sessionID TEXT,
     type TEXT,
-    x REAL,
-    y REAL,
-    color TEXT DEFAULT '#000000',
-    width INTEGER DEFAULT 5
+    x FLOAT,
+    y FLOAT,
+    color TEXT,
+    width INT DEFAULT 5
   )`,
-    (err) => {
-      if (err) {
-        console.error("Error creating drawings table:", err);
-      }
+  (err, result) => {
+    if (err) {
+      console.error("Error creating drawings table:", err);
     }
-  );
+  }
+);
 
-  db.run(
-    `CREATE TABLE IF NOT EXISTS bannedSessionIDs (
+pool.query(
+  `CREATE TABLE IF NOT EXISTS bannedSessionIDs (
     sessionID TEXT
   )`,
-    (err) => {
-      if (err) {
-        console.error("Error creating bannedSessionIDs table:", err);
-      }
+  (err, result) => {
+    if (err) {
+      console.error("Error creating bannedSessionIDs table:", err);
     }
-  );
-});
+  }
+);
 
 module.exports = {
   //deletes all drawings for a specific session ID
   deleteDrawingsBySessionID(sessionId, callback) {
-    db.run(
+    pool.query(
       "DELETE FROM drawings WHERE sessionID = ?",
       [sessionId],
-      function (err) {
+      (err, result) => {
         if (err) {
           console.error("Error deleting drawings by session ID:", err);
           callback(false);
+        } else {
+          callback(true);
         }
-        callback(true);
       }
     );
   },
@@ -50,7 +54,7 @@ module.exports = {
   //insert drawing data
   insertDrawingData(sessionID, data) {
     const { type, x, y, color, width } = data;
-    db.run(
+    pool.query(
       "INSERT INTO drawings (sessionID, type, x, y, color, width) VALUES (?, ?, ?, ?, ?, ?)",
       [sessionID, type, x, y, color, width],
       (err) => {
@@ -63,7 +67,7 @@ module.exports = {
 
   //gets all drawing data
   getAllDrawingData(callback) {
-    db.all("SELECT * FROM drawings", (err, rows) => {
+    pool.query("SELECT * FROM drawings", (err, rows) => {
       if (err) {
         console.error("Error getting all drawing data:" + err);
         return;
@@ -74,19 +78,20 @@ module.exports = {
 
   //deletes all drawings
   clearCanvas(callback) {
-    db.run("DELETE FROM drawings", (err) => {
+    pool.query("DELETE FROM drawings", (err) => {
       if (err) {
         console.log("Error clearing canvas: ", err);
         callback(false);
+      } else {
+        callback(true);
       }
-      callback(true);
     });
   },
 
   // Add a new banned sessionID
   banSessionID(sessionID, callback) {
-    db.run(
-      "INSERT INTO bannedSessionsIDs (sessionID) VALUES (?)",
+    pool.query(
+      "INSERT INTO bannedSessionIDs (sessionID) VALUES (?)",
       [sessionID],
       (err) => {
         if (err) {
@@ -100,14 +105,14 @@ module.exports = {
 
   // Check if a sessionID is banned
   isSessionIDBanned(sessionID, callback) {
-    db.get(
+    pool.query(
       "SELECT * FROM bannedSessionIDs WHERE sessionID = ?",
       [sessionID],
-      (err, row) => {
+      (err, result) => {
         if (err) {
           callback(err);
         } else {
-          callback(null, !!row);
+          callback(null, result.length > 0);
         }
       }
     );
@@ -115,7 +120,7 @@ module.exports = {
 
   // Remove a banned sessionID
   removeBannedSessionID(sessionID, callback) {
-    db.run(
+    pool.query(
       "DELETE FROM bannedSessionIDs WHERE sessionID = ?",
       [sessionID],
       (err) => {
@@ -128,20 +133,8 @@ module.exports = {
     );
   },
 
-  //closes connection to database
-  close(callback) {
-    db.close((err) => {
-      if (err) {
-        console.log("Error closing database: ", err);
-        callback(err);
-      }
-      console.log("Database connection closed successfully.");
-      callback(null);
-    });
-  },
-
   uniqueSessionIds(callback) {
-    db.all("SELECT DISTINCT sessionID FROM drawings", (err, rows) => {
+    pool.query("SELECT DISTINCT sessionID FROM drawings", (err, rows) => {
       if (err) {
         console.log("Error getting unique sessionIds: " + err);
         return;
@@ -150,4 +143,13 @@ module.exports = {
     });
   },
 
+  closeConnection() {
+    pool.end((err) => {
+      if (err) {
+        console.error("Error closing database connection:", err);
+        process.exit(1);
+      }
+      console.log("Database connection pool closed successfully.");
+    });
+  }
 };

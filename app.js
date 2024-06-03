@@ -101,22 +101,23 @@ io.on("connection", (socket) => {
   });
 
   // start drawing event
-  socket.on("startDrawing", ({ x, y, width }) => {
-    const data = { type: "start", x, y, color: clients[sessionId], width };
+  socket.on("startDrawing", ({ x, y, width, isErasing }) => {
+    const data = { type: "start", x, y, color: clients[sessionId], width, isErasing };
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("startDrawing", {
       x,
       y,
       color: clients[sessionId],
       width,
+      isErasing,
     });
   });
 
-  // drawing event
-  socket.on("draw", ({ x, y, width }) => {
-    const data = { type: "draw", x, y, color: clients[sessionId], width };
+  // draw event
+  socket.on("draw", ({ x, y, width, isErasing }) => {
+    const data = { type: "draw", x, y, color: clients[sessionId], width, isErasing };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("draw", { x, y, color: clients[sessionId], width });
+    socket.broadcast.emit("draw", { x, y, color: clients[sessionId], width, isErasing });
   });
 
   // stop drawing event
@@ -160,7 +161,7 @@ io.on("connection", (socket) => {
 
 // Handle server shutdown
 const shutdown = () => {
-  db.close((err) => {
+  db.closeConnection((err) => {
     if (err) {
       console.error("Error closing SQLite database:", err);
     }
@@ -168,8 +169,8 @@ const shutdown = () => {
   });
 };
 
+process.on("exit", shutdown);
 process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
 
 server.listen(3000, () => {
   console.log("Server running at http://127.0.0.1:3000");
