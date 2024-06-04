@@ -1,22 +1,17 @@
 const express = require("express");
 const { Server } = require("socket.io");
 const cookieParser = require("cookie-parser");
-
 const { sessionMiddleware, wrap } = require("./server/sessionStore");
-
 const { createServer } = require("node:http");
 const { join } = require("node:path");
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000",
-    credentials: true,
-  },
-});
 
 const db = require("./database/db");
+const config = require("./server/config");
+
+const io = new Server(server, config.cors);
 
 app.use(cookieParser());
 app.use(sessionMiddleware);
@@ -51,7 +46,7 @@ app.get("/admin", (req, res) => {
   });
 });
 
-app.get('/admin/sessions', (req, res) => {
+app.get("/admin/sessions", (req, res) => {
   db.uniqueSessionIds((sessionIds) => {
     res.json(sessionIds);
   });
@@ -102,7 +97,14 @@ io.on("connection", (socket) => {
 
   // start drawing event
   socket.on("startDrawing", ({ x, y, width, isErasing }) => {
-    const data = { type: "start", x, y, color: clients[sessionId], width, isErasing };
+    const data = {
+      type: "start",
+      x,
+      y,
+      color: clients[sessionId],
+      width,
+      isErasing,
+    };
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("startDrawing", {
       x,
@@ -115,9 +117,22 @@ io.on("connection", (socket) => {
 
   // draw event
   socket.on("draw", ({ x, y, width, isErasing }) => {
-    const data = { type: "draw", x, y, color: clients[sessionId], width, isErasing };
+    const data = {
+      type: "draw",
+      x,
+      y,
+      color: clients[sessionId],
+      width,
+      isErasing,
+    };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("draw", { x, y, color: clients[sessionId], width, isErasing });
+    socket.broadcast.emit("draw", {
+      x,
+      y,
+      color: clients[sessionId],
+      width,
+      isErasing,
+    });
   });
 
   // stop drawing event
@@ -150,7 +165,7 @@ io.on("connection", (socket) => {
           socket.broadcast.emit("loadDrawingData", drawingData);
         });
       }
-    })
+    });
   });
 
   // disconnect event
@@ -172,6 +187,6 @@ const shutdown = () => {
 process.on("exit", shutdown);
 process.on("SIGINT", shutdown);
 
-server.listen(3000, () => {
-  console.log("Server running at http://127.0.0.1:3000");
+server.listen(config.server.port, () => {
+  console.log(`Server running at http://127.0.0.1:${config.server.port}`);
 });

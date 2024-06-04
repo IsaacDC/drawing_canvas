@@ -1,11 +1,7 @@
 const mysql = require("mysql2");
+const config = require("../server/config");
 
-const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "Ironheat1",
-  database: "drawings_app",
-});
+const pool = mysql.createPool(config.database);
 
 pool.query(
   `CREATE TABLE IF NOT EXISTS drawings (
@@ -151,5 +147,5 @@ module.exports = {
       }
       console.log("Database connection pool closed successfully.");
     });
-  }
+  },
 };

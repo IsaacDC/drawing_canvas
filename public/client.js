@@ -13,18 +13,27 @@ document.addEventListener("DOMContentLoaded", () => {
   let isErasing = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
-  const clients = {};
+  let clients = {};
   var color;
+
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      const context = this;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+  }
 
   // mouse events
   canvas.addEventListener("mousedown", startDrawing);
-  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("mousemove", debounce(draw, 10));
   canvas.addEventListener("mouseup", stopDrawing);
   canvas.addEventListener("mouseleave", stopDrawing);
 
   // touch events
   canvas.addEventListener("touchstart", startDrawing);
-  canvas.addEventListener("touchmove", draw);
+  canvas.addEventListener("touchmove", debounce(draw, 10));
   canvas.addEventListener("touchend", stopDrawing);
   canvas.addEventListener("touchcancel", stopDrawing);
 
@@ -180,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.globalCompositeOperation = "destination-out";
       ctx.strokeStyle = "rgba(0, 0, 0, 1)"; 
     } else {
-      ctx.globalCompositeOperation = "source-over";n
+      ctx.globalCompositeOperation = "source-over";
     }
 
     isDrawing = true;
