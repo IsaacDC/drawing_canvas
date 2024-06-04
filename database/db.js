@@ -31,22 +31,6 @@ pool.query(
 );
 
 module.exports = {
-  //deletes all drawings for a specific session ID
-  deleteDrawingsBySessionID(sessionId, callback) {
-    pool.query(
-      "DELETE FROM drawings WHERE sessionID = ?",
-      [sessionId],
-      (err, result) => {
-        if (err) {
-          console.error("Error deleting drawings by session ID:", err);
-          callback(false);
-        } else {
-          callback(true);
-        }
-      }
-    );
-  },
-
   //insert drawing data
   insertDrawingData(sessionID, data) {
     const { type, x, y, color, width } = data;
@@ -70,6 +54,22 @@ module.exports = {
       }
       callback(rows);
     });
+  },
+
+  //deletes all drawings for a specific session ID
+  deleteDrawingsBySessionID(sessionId, callback) {
+    pool.query(
+      "DELETE FROM drawings WHERE sessionID = ?",
+      [sessionId],
+      (err, result) => {
+        if (err) {
+          console.error("Error deleting drawings by session ID:", err);
+          callback(false);
+        } else {
+          callback(true);
+        }
+      }
+    );
   },
 
   //deletes all drawings
@@ -139,13 +139,20 @@ module.exports = {
     });
   },
 
-  closeConnection() {
-    pool.end((err) => {
-      if (err) {
-        console.error("Error closing database connection:", err);
-        process.exit(1);
-      }
-      console.log("Database connection pool closed successfully.");
-    });
-  },
+  eraseDrawings(sessionID, x, y, width) {
+    pool.query(
+      "DELETE FROM drawings WHERE sessionID = ? AND x BETWEEN ? AND ? AND y BETWEEN ? AND ?",
+      [sessionID, x - width / 2, x + width / 2, y - width / 2, y + width / 2]
+    );
+  }
+
+  // closeConnection() {
+  //   pool.end((err) => {
+  //     if (err) {
+  //       console.error("Error closing database connection:", err);
+  //       process.exit(1);
+  //     }
+  //     console.log("Database connection pool closed successfully.");
+  //   });
+  // },
 };

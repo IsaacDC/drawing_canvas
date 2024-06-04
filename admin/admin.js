@@ -1,30 +1,32 @@
+const config = require('../server/config');
+
 document.addEventListener("DOMContentLoaded", function () {
-  const socket = io.connect("http://127.0.0.1:3000");
+  const socket = io.connect(config.server.URL);
 
   function login() {
-      let username = "";
-      let password = "";
+    let username = "";
+    let password = "";
 
-      while (true) {
-          username = prompt("Enter your username:");
-          if (username === null || username.trim() === "") {
-              alert("Please enter a username to continue.");
-              continue;
-          }
-
-          password = prompt("Enter your password:");
-          if (password === null || password.trim() === "") {
-              alert("Please enter a password to continue.");
-              continue;
-          }
-
-          if (username === "admin" && password === "password") {
-              break;
-
-          } else {
-              alert("Invalid username or password. Please try again.");
-          }
+    while (true) {
+      username = prompt("Enter your username:");
+      if (username === null || username.trim() === "") {
+        alert("Please enter a username to continue.");
+        continue;
       }
+
+      password = prompt("Enter your password:");
+      if (password === null || password.trim() === "") {
+        alert("Please enter a password to continue.");
+        continue;
+      }
+
+      if (username === "admin" && password === "password") {
+        break;
+
+      } else {
+        alert("Invalid username or password. Please try again.");
+      }
+    }
   }
 
   login();

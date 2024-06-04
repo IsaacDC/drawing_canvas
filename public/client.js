@@ -1,7 +1,6 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-
   const socket = io.connect("http://127.0.0.1:3000");
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
@@ -10,73 +9,63 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.height = 720;
 
   let isDrawing = false;
-  let isErasing = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
   let clients = {};
+  let mode = "pencil";
   var color;
 
-  function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-      const context = this;
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(context, args), wait);
-    };
-  }
-
   // mouse events
-  canvas.addEventListener("mousedown", startDrawing);
-  canvas.addEventListener("mousemove", debounce(draw, 10));
-  canvas.addEventListener("mouseup", stopDrawing);
-  canvas.addEventListener("mouseleave", stopDrawing);
+  $(canvas).on("mousedown", startDrawing);
+  $(canvas).on("mousemove", draw);
+  $(canvas).on("mouseup", stopDrawing);
+  $(canvas).on("mouseleave", stopDrawing);
 
   // touch events
-  canvas.addEventListener("touchstart", startDrawing);
-  canvas.addEventListener("touchmove", debounce(draw, 10));
-  canvas.addEventListener("touchend", stopDrawing);
-  canvas.addEventListener("touchcancel", stopDrawing);
+  $(canvas).on("touchstart", startDrawing);
+  $(canvas).on("touchmove", draw);
+  $(canvas).on("touchend", stopDrawing);
+  $(canvas).on("touchcancel", stopDrawing);
 
   //Clears drawings
-  const clearDrawings = document.getElementById("clear-all");
-  clearDrawings.addEventListener("click", () => {
+  $("#clear-all").on("click", () => {
     if (confirm('Are you sure you want to clear all drawings?')) {
       location.reload();
       socket.emit("clearDrawings");
     }
   });
 
-  const eraseToggle = document.getElementById("eraser");
-  eraseToggle.addEventListener("click", () => {
-    isErasing = !isErasing;
-  });
+  $("#pencil").click(function () { mode = "pencil"; });
+  $("#eraser").click(function () { mode = "eraser"; });
 
   //updates stroke color
-  const colorPicker = document.getElementById("stroke-color");
-  colorPicker.addEventListener("input", () => {
-    color = colorPicker.value;
+  $("#stroke-color").on("input", () => {
+    color = $("#stroke-color").val();
+    socket.emit("changeStrokeColor", color);
+  })
+
+  $(".color-field").on("click", function () {
+    color = $(this).data("color");
     socket.emit("changeStrokeColor", color);
   });
 
-  const colorFields = document.querySelectorAll(".color-field");
-  colorFields.forEach((colorField) => {
-    colorField.addEventListener("click", () => {
-      color = colorField.getAttribute('data-color');
-      socket.emit("changeStrokeColor", color);
-    });
-  });
-
   //change stroke width
-  const strokeWidth = document.getElementById("stroke-width");
-  strokeWidth.addEventListener("input", () => {
-    ctx.lineWidth = strokeWidth.value;
-    socket.emit("changeStrokeWidth", strokeWidth.value);
+  $("#stroke-width").on("input", () => {
+    ctx.lineWidth = $("#stroke-width").val();
+    socket.emit("changeStrokeWidth", $("#stroke-width").val());
   });
 
   //begins the drawing process
   function startDrawing(e) {
     e.preventDefault();
     isDrawing = true;
+
+    if (mode == "pencil") {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = color;
+    } else {
+      ctx.globalCompositeOperation = "destination-out";
+    }
 
     const rect = canvas.getBoundingClientRect();
     let x, y;
@@ -85,8 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.type.startsWith("mouse")) {
       [x, y] = [e.offsetX, e.offsetY];
     }
-    // Touch events
-    else {
+    else {  // Touch events
       const touch = e.touches[0];
       [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
     }
@@ -95,23 +83,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.beginPath();
     ctx.moveTo(lastMouseX, lastMouseY);
-
-    if (isErasing) {
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.strokeStyle = "rgba(0, 0, 0, 1)";
-    } else {
-      ctx.globalCompositeOperation = "source-over";
-      ctx.strokeStyle = color;
-    }
-
     ctx.lineCap = "round";
-    ctx.lineWidth = strokeWidth.value;
+    ctx.lineWidth = $("#stroke-width").val();
 
     socket.emit("startDrawing", {
       x: lastMouseX,
       y: lastMouseY,
-      width: strokeWidth.value,
-      isErasing,
+      width: $("#stroke-width").val(),
     });
   }
 
@@ -132,17 +110,23 @@ document.addEventListener("DOMContentLoaded", () => {
       [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
     }
 
-    if (isErasing) {
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.strokeStyle = "rgba(0, 0, 0, 0)";
-    } else {
+    if (mode === "pencil") {
       ctx.globalCompositeOperation = "source-over";
+      ctx.lineTo(x, y);
       ctx.strokeStyle = color;
+      ctx.lineWidth = $("#stroke-width").val();
+      ctx.lineCap = "round";
+      ctx.stroke();
+      socket.emit("draw", { x, y });
+    } else if (mode === "eraser") {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      ctx.lineTo(x, y);
+      ctx.lineCap = "round";
+      ctx.stroke();
+      socket.emit("erase", { x, y, width: $("#stroke-width").val() });
     }
 
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    socket.emit("draw", { x, y, isErasing });
     [lastMouseX, lastMouseY] = [x, y];
   }
 
@@ -178,30 +162,27 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   //draws on the non-drawing client(s) screen(s)
-  socket.on("startDrawing", ({ x, y, color, width, isErasing }) => {
+  socket.on("startDrawing", ({ x, y, color, width }) => {
+    if (mode == "pencil") {
+      ctx.globalCompositeOperation = "source-over";
+    } else {
+      ctx.globalCompositeOperation = "destination-out";
+    }
+
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.strokeStyle = color;
     ctx.lineWidth = width;
     ctx.lineCap = "round";
 
-    if (isErasing) {
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.strokeStyle = "rgba(0, 0, 0, 1)"; 
-    } else {
-      ctx.globalCompositeOperation = "source-over";
-    }
-
     isDrawing = true;
   });
 
-  socket.on("draw", ({ x, y, color, width, isErasing }) => {
-    if (isErasing) {
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.strokeStyle = "rgba(0, 0, 0, 1)"; 
+  socket.on("draw", ({ x, y, color, width, mode }) => {
+    if (mode == "pencil") {
+      ctx.globalCompositeOperation = "source-over";
     } else {
-      ctx.globalCompositeOperation = "source-over"; 
-      ctx.strokeStyle = color;
+      ctx.globalCompositeOperation = "destination-out";
     }
 
     ctx.lineTo(x, y);

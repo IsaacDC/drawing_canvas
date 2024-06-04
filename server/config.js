@@ -6,11 +6,12 @@ module.exports = {
   database: {
     host: "localhost",
     user: "root",
-    password: "Ironheat#03",
+    password: "Ironheat1",
     database: "drawings_app",
   },
   server: {
     port: 3000,
+    URL: "http://localhost:3000",
   },
   cors: {
     origin: "http://localhost:3000",

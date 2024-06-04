@@ -96,14 +96,13 @@ io.on("connection", (socket) => {
   });
 
   // start drawing event
-  socket.on("startDrawing", ({ x, y, width, isErasing }) => {
+  socket.on("startDrawing", ({ x, y, width }) => {
     const data = {
       type: "start",
       x,
       y,
       color: clients[sessionId],
       width,
-      isErasing,
     };
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("startDrawing", {
@@ -111,19 +110,18 @@ io.on("connection", (socket) => {
       y,
       color: clients[sessionId],
       width,
-      isErasing,
     });
   });
 
   // draw event
-  socket.on("draw", ({ x, y, width, isErasing }) => {
+  socket.on("draw", ({ x, y, width, mode }) => {
     const data = {
       type: "draw",
       x,
       y,
       color: clients[sessionId],
       width,
-      isErasing,
+      mode,
     };
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("draw", {
@@ -131,7 +129,7 @@ io.on("connection", (socket) => {
       y,
       color: clients[sessionId],
       width,
-      isErasing,
+      mode
     });
   });
 
@@ -168,6 +166,10 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("erase", ({ x, y, width }) => {
+    db.eraseDrawings(sessionId, x, y, width)
+  })
+
   // disconnect event
   socket.on("disconnect", () => {
     delete clients[sessionId];
@@ -175,17 +177,17 @@ io.on("connection", (socket) => {
 });
 
 // Handle server shutdown
-const shutdown = () => {
-  db.closeConnection((err) => {
-    if (err) {
-      console.error("Error closing SQLite database:", err);
-    }
-    process.exit(0);
-  });
-};
+// const shutdown = () => {
+//   db.closeConnection((err) => {
+//     if (err) {
+//       console.error("Error closing SQLite database:", err);
+//     }
+//     process.exit(0);
+//   });
+// };
 
-process.on("exit", shutdown);
-process.on("SIGINT", shutdown);
+// process.on("exit", shutdown);
+// process.on("SIGINT", shutdown);
 
 server.listen(config.server.port, () => {
   console.log(`Server running at http://127.0.0.1:${config.server.port}`);
