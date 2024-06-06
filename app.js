@@ -140,6 +140,38 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("stopDrawing");
   });
 
+  // start erasing event
+  socket.on("startErasing", ({ x, y, width }) => {
+    const data = {
+      type: "startErase",
+      x,
+      y,
+      width,
+    };
+    db.insertDrawingData(sessionId, data);
+    socket.broadcast.emit("startErasing", {
+      x,
+      y,
+      width,
+    });
+  });
+
+  // erase event
+  socket.on("erase", ({ x, y, width }) => {
+    const data = {
+      type: "erase",
+      x,
+      y,
+      width,
+    };
+    db.insertDrawingData(sessionId, data);
+    socket.broadcast.emit("erase", {
+      x,
+      y,
+      width,
+    });
+  });
+
   socket.on("drawingData", (data) => {
     db.insertDrawingData(sessionId, data);
   });
@@ -166,28 +198,11 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("erase", ({ x, y, width }) => {
-    db.eraseDrawings(sessionId, x, y, width)
-  })
-
   // disconnect event
   socket.on("disconnect", () => {
     delete clients[sessionId];
   });
 });
-
-// Handle server shutdown
-// const shutdown = () => {
-//   db.closeConnection((err) => {
-//     if (err) {
-//       console.error("Error closing SQLite database:", err);
-//     }
-//     process.exit(0);
-//   });
-// };
-
-// process.on("exit", shutdown);
-// process.on("SIGINT", shutdown);
 
 server.listen(config.server.port, () => {
   console.log(`Server running at http://127.0.0.1:${config.server.port}`);

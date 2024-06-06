@@ -1,7 +1,7 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const socket = io.connect("http://127.0.0.1:3000");
+  const socket = io.connect();
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -60,13 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     isDrawing = true;
 
-    if (mode == "pencil") {
-      ctx.globalCompositeOperation = "source-over";
-      ctx.strokeStyle = color;
-    } else {
-      ctx.globalCompositeOperation = "destination-out";
-    }
-
     const rect = canvas.getBoundingClientRect();
     let x, y;
 
@@ -81,16 +74,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     [lastMouseX, lastMouseY] = [x, y];
 
-    ctx.beginPath();
-    ctx.moveTo(lastMouseX, lastMouseY);
-    ctx.lineCap = "round";
-    ctx.lineWidth = $("#stroke-width").val();
+    if (mode == "pencil") {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.beginPath();
+      ctx.moveTo(lastMouseX, lastMouseY);
+      ctx.lineCap = "round";
+      ctx.lineWidth = $("#stroke-width").val();
+      ctx.strokeStyle = color;
 
-    socket.emit("startDrawing", {
-      x: lastMouseX,
-      y: lastMouseY,
-      width: $("#stroke-width").val(),
-    });
+      socket.emit("startDrawing", {
+        x: lastMouseX,
+        y: lastMouseY,
+        width: $("#stroke-width").val(),
+      });
+
+    } else {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      ctx.moveTo(lastMouseX, lastMouseY);
+      ctx.lineCap = "round";
+      ctx.lineWidth = $("#stroke-width").val();
+
+      socket.emit("startErasing", {
+        x: lastMouseX,
+        y: lastMouseY,
+        width: $("#stroke-width").val(),
+      });
+    }
+
   }
 
   function draw(e) {
@@ -113,18 +124,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mode === "pencil") {
       ctx.globalCompositeOperation = "source-over";
       ctx.lineTo(x, y);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = $("#stroke-width").val();
-      ctx.lineCap = "round";
       ctx.stroke();
       socket.emit("draw", { x, y });
     } else if (mode === "eraser") {
       ctx.globalCompositeOperation = "destination-out";
-      ctx.beginPath();
       ctx.lineTo(x, y);
-      ctx.lineCap = "round";
       ctx.stroke();
-      socket.emit("erase", { x, y, width: $("#stroke-width").val() });
+      socket.emit("erase", { x, y });
     }
 
     [lastMouseX, lastMouseY] = [x, y];
@@ -149,9 +155,21 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.strokeStyle = data.color;
         ctx.lineWidth = data.width;
         ctx.lineCap = "round";
+      } else if (data.type == "startErasing") {
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.beginPath();
+        ctx.moveTo(data.x, data.y);
+        ctx.lineWidth = data.width;
+        ctx.lineCap = "round";
       } else if (data.type === "draw") {
         ctx.lineTo(data.x, data.y);
         ctx.strokeStyle = data.color;
+        ctx.lineWidth = data.width;
+        ctx.lineCap = "round";
+        ctx.stroke();
+      } else if (data.type === "erase") {
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.lineTo(data.x, data.y);
         ctx.lineWidth = data.width;
         ctx.lineCap = "round";
         ctx.stroke();
@@ -159,51 +177,52 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.beginPath();
       }
     });
-  });
 
-  //draws on the non-drawing client(s) screen(s)
-  socket.on("startDrawing", ({ x, y, color, width }) => {
-    if (mode == "pencil") {
-      ctx.globalCompositeOperation = "source-over";
-    } else {
-      ctx.globalCompositeOperation = "destination-out";
-    }
+    //draws on the non-drawing client(s) screen(s)
+    socket.on("startDrawing", ({ x, y, color, width }) => {
+      if (mode == "pencil") {
+        ctx.globalCompositeOperation = "source-over";
+      } else {
+        ctx.globalCompositeOperation = "destination-out";
+      }
 
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
-
-    isDrawing = true;
-  });
-
-  socket.on("draw", ({ x, y, color, width, mode }) => {
-    if (mode == "pencil") {
-      ctx.globalCompositeOperation = "source-over";
-    } else {
-      ctx.globalCompositeOperation = "destination-out";
-    }
-
-    ctx.lineTo(x, y);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
-    ctx.stroke();
-  });
-
-  socket.on("stopDrawing", () => {
-    isDrawing = false;
-    ctx.beginPath();
-  });
-
-  socket.on("changeStrokeColor", ({ sessionId, color }) => {
-    clients[sessionId] = color;
-  });
-
-  socket.on("changeStrokeWidth", ({ socketId, width }) => {
-    if (socketId !== socket.id) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.strokeStyle = color;
       ctx.lineWidth = width;
-    }
+      ctx.lineCap = "round";
+
+      isDrawing = true;
+    });
+
+    socket.on("draw", ({ x, y, color, width }) => {
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.stroke();
+    });
+
+    socket.on("erase", ({ x, y, width }) => {
+      ctx.lineTo(x, y);
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.stroke();
+    });
+
+    socket.on("stopDrawing", () => {
+      isDrawing = false;
+      ctx.beginPath();
+    });
+
+    socket.on("changeStrokeColor", ({ sessionId, color }) => {
+      clients[sessionId] = color;
+    });
+
+    socket.on("changeStrokeWidth", ({ socketId, width }) => {
+      if (socketId !== socket.id) {
+        ctx.lineWidth = width;
+      }
+    });
   });
-});
+})

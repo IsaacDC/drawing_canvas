@@ -3,33 +3,6 @@ const config = require("../server/config");
 
 const pool = mysql.createPool(config.database);
 
-pool.query(
-  `CREATE TABLE IF NOT EXISTS drawings (
-    sessionID TEXT,
-    type TEXT,
-    x FLOAT,
-    y FLOAT,
-    color TEXT,
-    width INT DEFAULT 5
-  )`,
-  (err, result) => {
-    if (err) {
-      console.error("Error creating drawings table:", err);
-    }
-  }
-);
-
-pool.query(
-  `CREATE TABLE IF NOT EXISTS bannedSessionIDs (
-    sessionID TEXT
-  )`,
-  (err, result) => {
-    if (err) {
-      console.error("Error creating bannedSessionIDs table:", err);
-    }
-  }
-);
-
 module.exports = {
   //insert drawing data
   insertDrawingData(sessionID, data) {
@@ -137,13 +110,6 @@ module.exports = {
       }
       callback(rows);
     });
-  },
-
-  eraseDrawings(sessionID, x, y, width) {
-    pool.query(
-      "DELETE FROM drawings WHERE sessionID = ? AND x BETWEEN ? AND ? AND y BETWEEN ? AND ?",
-      [sessionID, x - width / 2, x + width / 2, y - width / 2, y + width / 2]
-    );
   }
 
   // closeConnection() {
