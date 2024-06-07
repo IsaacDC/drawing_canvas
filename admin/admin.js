@@ -1,7 +1,6 @@
-const config = require('../server/config');
 
 document.addEventListener("DOMContentLoaded", function () {
-  const socket = io.connect(config.server.URL);
+  const socket = io.connect();
 
   function login() {
     let username = "";
