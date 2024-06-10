@@ -6,7 +6,7 @@ module.exports = {
   database: {
     host: "localhost",
     user: "root",
-    password: "Ironheat1",
+    password: "",
     database: "drawings_app",
   },
   server: {

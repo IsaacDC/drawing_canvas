@@ -35,8 +35,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  $("#pencil").click(function () { mode = "pencil"; });
-  $("#eraser").click(function () { mode = "eraser"; });
+  const $eraserBtn = $("#eraser");
+  const $pencilBtn = $("#pencil");
+
+  $eraserBtn.click(function() {
+    $eraserBtn.addClass('active');
+    $pencilBtn.removeClass('active');
+    mode = "eraser";
+  });
+
+  $pencilBtn.click(function() {
+    $pencilBtn.addClass('active');
+    $eraserBtn.removeClass('active');
+    mode = "pencil";
+  });
 
   //updates stroke color
   $("#stroke-color").on("input", () => {
@@ -50,9 +62,38 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   //change stroke width
-  $("#stroke-width").on("input", () => {
-    ctx.lineWidth = $("#stroke-width").val();
-    socket.emit("changeStrokeWidth", $("#stroke-width").val());
+  function updateValues(value) {
+    $("#stroke-width").val(value);
+    $("#slider-value").val(value);
+    ctx.lineWidth = value;
+    socket.emit("changeStrokeWidth", value);
+  }
+
+  // Update input value and stroke width when slider changes
+  $("#stroke-width").on("input", function () {
+    const value = $(this).val();
+    updateValues(value);
+  });
+
+  // Update slider and stroke width when input value changes
+  $("#slider-value").on("input", function () {
+    let value = $(this).val();
+    if (value > 100) {
+      value = 100;
+    } else if (value < 1) {
+      value = 1;
+    }
+    updateValues(value);
+  });
+  // invalid stroke value handler
+  $("#slider-value").on("blur", function () {
+    let value = $(this).val();
+    if (value > 100) {
+      value = 100;
+    } else if (value < 1) {
+      value = 1;
+    }
+    updateValues(value);
   });
 
   //begins the drawing process

@@ -89,6 +89,7 @@ const clients = {};
 
 io.use(wrap(sessionMiddleware));
 io.on("connection", (socket) => {
+  
   const sessionId = socket.request.session.id;
 
   db.getAllDrawingData((drawingData) => {
@@ -114,14 +115,13 @@ io.on("connection", (socket) => {
   });
 
   // draw event
-  socket.on("draw", ({ x, y, width, mode }) => {
+  socket.on("draw", ({ x, y, width }) => {
     const data = {
       type: "draw",
       x,
       y,
       color: clients[sessionId],
       width,
-      mode,
     };
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("draw", {
@@ -129,7 +129,6 @@ io.on("connection", (socket) => {
       y,
       color: clients[sessionId],
       width,
-      mode
     });
   });
 
