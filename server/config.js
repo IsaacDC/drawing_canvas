@@ -1,4 +1,8 @@
+const URL = `http://localhost:`;
+
 module.exports = {
+  URL: URL,
+
   redisConfig: {
     host: "localhost",
     port: 6379,
@@ -6,15 +10,15 @@ module.exports = {
   database: {
     host: "localhost",
     user: "root",
-    password: "",
+    password: "password",
     database: "drawings_app",
   },
   server: {
     port: 3000,
-    URL: "http://localhost:3000",
+    URL: URL,
   },
   cors: {
-    origin: "http://localhost:3000",
+    origin: `${URL}3000`,
     credentials: true,
   },
 };

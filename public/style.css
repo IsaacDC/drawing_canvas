@@ -13,6 +13,7 @@ body {
 canvas {
   margin: 10px;
   border: 1px solid black;
+  background-color: white;
 }
 
 .tools {
@@ -47,13 +48,16 @@ button {
 
 #eraser {
   background-color: #ff9800;
+  display: none;
 }
 
 #pencil {
   background-color: #2196F3;
+  display: none;
 }
+
 #eraser.active {
-  background-color: darken(#ff9800, 20%); 
+  background-color: darken(#ff9800, 20%);
 }
 
 #pencil.active {

@@ -30,19 +30,24 @@ module.exports = {
   },
 
   //deletes all drawings for a specific session ID
-  deleteDrawingsBySessionID(sessionId, callback) {
+  deleteDrawingsBySessionID(sessionId) {
     pool.query(
       "DELETE FROM drawings WHERE sessionID = ?",
       [sessionId],
-      (err, result) => {
+      (err) => {
         if (err) {
           console.error("Error deleting drawings by session ID:", err);
-          callback(false);
-        } else {
-          callback(true);
         }
       }
     );
+  },
+
+  tempClearCanvas(sessionID) {
+    pool.query("UPDATE drawings SET color = 'white' WHERE sessionID = ?", [sessionID], (err) => {
+      if (err) {
+        console.error("Error updating drawing data:", err);
+      }
+    })
   },
 
   //deletes all drawings
@@ -111,14 +116,4 @@ module.exports = {
       callback(rows);
     });
   }
-
-  // closeConnection() {
-  //   pool.end((err) => {
-  //     if (err) {
-  //       console.error("Error closing database connection:", err);
-  //       process.exit(1);
-  //     }
-  //     console.log("Database connection pool closed successfully.");
-  //   });
-  // },
 };

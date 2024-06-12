@@ -2,8 +2,6 @@ const session = require("express-session");
 const Redis = require("ioredis");
 const RedisStore = require("connect-redis").default;
 const { v4: uuidv4 } = require("uuid");
-const dotenv = require("dotenv");
-dotenv.config();
 
 const redisClient = new Redis({
   host: process.env.REDIS_HOST,
@@ -22,7 +20,7 @@ const sessionMiddleware = session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "development",
     sameSite: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   },

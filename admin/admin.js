@@ -2,33 +2,33 @@
 document.addEventListener("DOMContentLoaded", function () {
   const socket = io.connect();
 
-  function login() {
-    let username = "";
-    let password = "";
+  // function login() {
+  //   let username = "";
+  //   let password = "";
 
-    while (true) {
-      username = prompt("Enter your username:");
-      if (username === null || username.trim() === "") {
-        alert("Please enter a username to continue.");
-        continue;
-      }
+  //   while (true) {
+  //     username = prompt("Enter your username:");
+  //     if (username === null || username.trim() === "") {
+  //       alert("Please enter a username to continue.");
+  //       continue;
+  //     }
 
-      password = prompt("Enter your password:");
-      if (password === null || password.trim() === "") {
-        alert("Please enter a password to continue.");
-        continue;
-      }
+  //     password = prompt("Enter your password:");
+  //     if (password === null || password.trim() === "") {
+  //       alert("Please enter a password to continue.");
+  //       continue;
+  //     }
 
-      if (username === "admin" && password === "password") {
-        break;
+  //     if (username === "admin" && password === "password") {
+  //       break;
 
-      } else {
-        alert("Invalid username or password. Please try again.");
-      }
-    }
-  }
+  //     } else {
+  //       alert("Invalid username or password. Please try again.");
+  //     }
+  //   }
+  // }
 
-  login();
+  // login();
 
   //loads drawings for each canvas per session respectfully
   function renderDrawings() {
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const clearCanvas = document.getElementById("clear-canvas");
   clearCanvas.addEventListener("click", () => {
     if (confirm("Are you sure you want to clear the canvas?")) {
-      fetch("/clear", {
+      fetch("/clearCanvas", {
         method: "DELETE",
       })
         .then((response) => response.json())
