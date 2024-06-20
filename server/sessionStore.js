@@ -3,9 +3,11 @@ const Redis = require("ioredis");
 const RedisStore = require("connect-redis").default;
 const { v4: uuidv4 } = require("uuid");
 
+const config = require("./config");
+
 const redisClient = new Redis({
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
+  host: config.redisConfig.host,
+  port: config.redisConfig.port,
 });
 redisClient.on("error", function (err) {
   console.log("Could not establish a connection to Redis" + err);
@@ -22,9 +24,9 @@ const sessionMiddleware = session({
   cookie: {
     secure: process.env.NODE_ENV === "development",
     sameSite: true,
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    maxAge: 12 * (30 * 24 * 60 * 60 * 1000), // 30 days
   },
-  genid: (req) => uuidv4() + "-" + Date.now(),
+  genid: (req) => uuidv4(),
 });
 
 const wrap = (expressMiddleware) => (socket, next) =>

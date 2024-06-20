@@ -1,6 +1,5 @@
 const express = require("express");
 const { Server } = require("socket.io");
-const cookieParser = require("cookie-parser");
 const { sessionMiddleware, wrap } = require("./server/sessionStore");
 const { createServer } = require("node:http");
 const { join } = require("node:path");
@@ -13,7 +12,9 @@ const config = require("./server/config");
 
 const io = new Server(server, config.cors);
 
-app.use(cookieParser());
+const WorkerPool = require('./server/workerPool');
+const workers = new WorkerPool(3, './drawingWorker');
+
 app.use(sessionMiddleware);
 
 app.use(express.static("public"));
@@ -31,7 +32,6 @@ app.get("/", (req, res) => {
       } else if (isBanned) {
         res.status(403).send("Access denied");
       } else {
-        req.session.save();
         res.sendFile(join(__dirname, "./public/index.html"));
       }
     });
@@ -47,19 +47,15 @@ app.get("/admin", (req, res) => {
 });
 
 app.get("/admin/sessions", (req, res) => {
-  db.uniqueSessionIds((sessionIds) => {
-    res.json(sessionIds);
+  db.uniqueSessionIds((sessionId) => {
+    res.json(sessionId);
   });
 });
 
 app.delete("/delete/:sessionId", (req, res) => {
   const sessionId = req.params.sessionId;
   db.deleteDrawingsBySessionID(sessionId, (result) => {
-    if (result) {
-      res.json({ success: true });
-    } else {
-      res.json({ success: false });
-    }
+    res.json({ success: result });
   });
 });
 
@@ -77,11 +73,7 @@ app.post("/ban/:sessionId", (req, res) => {
 
 app.delete("/clearCanvas", (req, res) => {
   db.clearCanvas((result) => {
-    if (result) {
-      res.json({ success: true });
-    } else {
-      res.json({ success: false });
-    }
+    res.json({ success: result });
   });
 });
 
@@ -89,47 +81,24 @@ const clients = {};
 
 io.use(wrap(sessionMiddleware));
 io.on("connection", (socket) => {
-
   const sessionId = socket.request.session.id;
 
-  db.getAllDrawingData((drawingData) => {
-    socket.emit("loadDrawingData", drawingData);
+  workers.runTask({ type: 'loadDrawingData' }, (data) => {
+    socket.emit('loadDrawingData', data.data);
   });
-
+  
   // start drawing event
   socket.on("startDrawing", ({ x, y, width }) => {
-    const data = {
-      type: "start",
-      x,
-      y,
-      color: clients[socket.id],
-      width,
-    };
+    const data = { type: "start", x, y, color: clients[socket.id], width };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("startDrawing", {
-      x,
-      y,
-      color: clients[socket.id],
-      width,
-    });
+    socket.broadcast.emit("startDrawing", data);
   });
 
   // draw event
   socket.on("draw", ({ x, y, width }) => {
-    const data = {
-      type: "draw",
-      x,
-      y,
-      color: clients[socket.id],
-      width,
-    };
+    const data = { type: "draw", x, y, color: clients[socket.id], width };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("draw", {
-      x,
-      y,
-      color: clients[socket.id],
-      width,
-    });
+    socket.broadcast.emit("draw", data);
   });
 
   // stop drawing event
@@ -152,10 +121,8 @@ io.on("connection", (socket) => {
 
   // clear drawings event
   socket.on("clearDrawings", () => {
-    db.tempClearCanvas(sessionId);
-    io.emit("clearCanvasForSession", sessionId);
-
-    db.deleteDrawingsBySessionID(sessionId)
+    db.deleteDrawingsBySessionID(sessionId);
+    socket.broadcast.emit("clearSessionsDrawings", sessionId);
   });
 
   // disconnect event
@@ -163,8 +130,6 @@ io.on("connection", (socket) => {
     delete clients[socket.id];
   });
 });
-
-
 
 server.listen(config.server.port, () => {
   console.log(`Server running at http://127.0.0.1:${config.server.port}`);

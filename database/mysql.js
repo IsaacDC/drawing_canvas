@@ -4,6 +4,7 @@ const config = require("../server/config");
 const pool = mysql.createPool(config.database);
 
 module.exports = {
+
   //insert drawing data
   insertDrawingData(sessionID, data) {
     const { type, x, y, color, width } = data;
@@ -29,6 +30,21 @@ module.exports = {
     });
   },
 
+  getDrawingsBySessionID(sessionId, callback) {
+    pool.query(
+      "SELECT * FROM drawings WHERE sessionID = ?",
+      [sessionId],
+      (err, rows) => {
+        if (err) {
+          console.error("Error getting drawings by session ID:", err);
+          callback(err, null);
+        } else {
+          callback(null, rows);
+        }
+      }
+    );
+  },
+
   //deletes all drawings for a specific session ID
   deleteDrawingsBySessionID(sessionId) {
     pool.query(
@@ -40,14 +56,6 @@ module.exports = {
         }
       }
     );
-  },
-
-  tempClearCanvas(sessionID) {
-    pool.query("UPDATE drawings SET color = 'white' WHERE sessionID = ?", [sessionID], (err) => {
-      if (err) {
-        console.error("Error updating drawing data:", err);
-      }
-    })
   },
 
   //deletes all drawings

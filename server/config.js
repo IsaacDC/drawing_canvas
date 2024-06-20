@@ -4,7 +4,7 @@ module.exports = {
   URL: URL,
 
   redisConfig: {
-    host: "localhost",
+    host: "172.31.164.107",
     port: 6379,
   },
   database: {
