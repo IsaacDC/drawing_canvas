@@ -119,8 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.stroke();
 
     socket.emit("draw", { x, y, color, width: strokeWidth });
-
-
   }
 
   function stopDrawing(e) {

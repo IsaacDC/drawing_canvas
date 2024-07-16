@@ -1,7 +1,9 @@
 const URL = `http://localhost:`;
+const NODE_ENV = 'development';
 
 module.exports = {
   URL: URL,
+  NODE_ENV: NODE_ENV,
 
   redisConfig: {
     host: "172.31.164.107",
@@ -10,7 +12,7 @@ module.exports = {
   database: {
     host: "localhost",
     user: "root",
-    password: "password",
+    password: "",
     database: "drawings_app",
   },
   server: {

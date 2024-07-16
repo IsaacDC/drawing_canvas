@@ -1,15 +1,10 @@
 const { parentPort } = require('node:worker_threads');
-const db = require('../database/mysql');
+const db = require('../database/db');
 
 parentPort.on('message', (message) => {
     if (message === 'loadDrawingData') {
-        db.uniqueSessionIds((sessionIds) => {
-            sessionIds.forEach((sessionId) => {
-                db.getDrawingsBySessionID(sessionId
-
-                )
-            })
-        })
+        db.getAllDrawingData((drawingData) => {
+            parentPort.postMessage(drawingData);
+        });
     }
-    parentPort.postMessage(drawingData);
 });

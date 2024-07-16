@@ -114,14 +114,4 @@ module.exports = {
       }
     );
   },
-
-  uniqueSessionIds(callback) {
-    pool.query("SELECT DISTINCT sessionID FROM drawings", (err, rows) => {
-      if (err) {
-        console.log("Error getting unique sessionIds: " + err);
-        return;
-      }
-      callback(rows);
-    });
-  }
 };

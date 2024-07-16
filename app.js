@@ -7,7 +7,7 @@ const { join } = require("node:path");
 const app = express();
 const server = createServer(app);
 
-const db = require("./database/mysql");
+const db = require("./database/db");
 const config = require("./server/config");
 
 const io = new Server(server, config.cors);
@@ -86,6 +86,7 @@ io.on("connection", (socket) => {
   workers.runTask({ type: 'loadDrawingData' }, (data) => {
     socket.emit('loadDrawingData', data.data);
   });
+
   
   // start drawing event
   socket.on("startDrawing", ({ x, y, width }) => {

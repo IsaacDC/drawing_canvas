@@ -12,7 +12,7 @@ const redisClient = new Redis({
 redisClient.on("error", function (err) {
   console.log("Could not establish a connection to Redis" + err);
 });
-redisClient.on("connect", function (err) {
+redisClient.on("connect", function() {
   console.log("Connected to Redis");
 });
 
@@ -22,7 +22,7 @@ const sessionMiddleware = session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "development",
+    secure: process.env.NODE_ENV === config.NODE_ENV,
     sameSite: true,
     maxAge: 12 * (30 * 24 * 60 * 60 * 1000), // 30 days
   },
