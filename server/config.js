@@ -6,13 +6,13 @@ module.exports = {
   NODE_ENV: NODE_ENV,
 
   redisConfig: {
-    host: "172.31.164.107",
+    host: "127.0.0.1",
     port: 6379,
   },
   database: {
     host: "localhost",
     user: "root",
-    password: "",
+    password: "password",
     database: "drawings_app",
   },
   server: {
