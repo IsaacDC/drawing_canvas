@@ -1,10 +1,12 @@
 const URL = `http://localhost:`;
+const NODE_ENV = 'development';
 
 module.exports = {
   URL: URL,
+  NODE_ENV: NODE_ENV,
 
   redisConfig: {
-    host: "localhost",
+    host: "127.0.0.1",
     port: 6379,
   },
   database: {

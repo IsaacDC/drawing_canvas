@@ -1,5 +1,4 @@
 "use strict";
-
 document.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect();
   const canvas = document.getElementById("canvas");
@@ -12,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastMouseX = 0;
   let lastMouseY = 0;
   let clients = {};
-  let mode = "pencil";
-  let color;
+  let color = "#000000";
+  let strokeWidth = 5;
 
   // mouse events
   $(canvas).on("mousedown", startDrawing);
@@ -34,22 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  const $eraserBtn = $("#eraser");
-  const $pencilBtn = $("#pencil");
-
-  $eraserBtn.click(function () {
-    $eraserBtn.addClass('active');
-    $pencilBtn.removeClass('active');
-    mode = "eraser";
-    color = "white";
-  });
-
-  $pencilBtn.click(function () {
-    $pencilBtn.addClass('active');
-    $eraserBtn.removeClass('active');
-    mode = "pencil";
-  });
-
   //updates stroke color
   $("#stroke-color").on("input", () => {
     color = $("#stroke-color").val();
@@ -58,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //change stroke width
   function updateValues(value) {
+    strokeWidth = value;
     $("#stroke-width").val(value);
     $("#slider-value").val(value);
     ctx.lineWidth = value;
@@ -71,21 +55,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Update slider and stroke width when input value changes
   $("#slider-value").on("input", function () {
     let value = $(this).val();
-    if (value > 100) {
-      value = 100;
-    } else if (value < 0) {
-      value = 1;
-    }
+    value = Math.max(1, Math.min(value, 100));
     updateValues(value);
   });
   // invalid stroke value handler
   $("#slider-value").on("blur", function () {
     let value = $(this).val();
-    if (value > 100) {
-      value = 100;
-    } else if (value < 1) {
-      value = 1;
-    }
+    value = Math.max(1, Math.min(value, 100)); // Clamp value between 1 and 100
     updateValues(value);
   });
 
@@ -108,22 +84,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     [lastMouseX, lastMouseY] = [x, y];
 
-    if (mode == 'eraser') {
-      color = "white"
-    }
-
     ctx.beginPath();
     ctx.moveTo(lastMouseX, lastMouseY);
     ctx.lineCap = "round";
-    ctx.lineWidth = $("#stroke-width").val();
+    ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = color;
 
     socket.emit("startDrawing", {
       x: lastMouseX,
       y: lastMouseY,
+      color,
       width: $("#stroke-width").val(),
     });
-
   }
 
   function draw(e) {
@@ -145,9 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.lineTo(x, y);
     ctx.stroke();
-    socket.emit("draw", { x, y });
 
-    [lastMouseX, lastMouseY] = [x, y];
+    socket.emit("draw", { x, y, color, width: strokeWidth });
   }
 
   function stopDrawing(e) {
@@ -181,10 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //draws on the non-drawing client(s) screen(s)
   socket.on("startDrawing", ({ x, y, color, width }) => {
-    if (mode == 'eraser') {
-      color = "white"
-    }
-
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.strokeStyle = color;
@@ -194,10 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("draw", ({ x, y, color, width }) => {
-    if (mode == 'eraser') {
-      color = "white"
-    }
-
     ctx.lineTo(x, y);
     ctx.strokeStyle = color;
     ctx.lineWidth = width;
@@ -221,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  socket.on("clearCanvasForSession", () => {
+  socket.on("clearSessionsDrawings", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   })
 })

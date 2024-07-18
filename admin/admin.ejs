@@ -1,59 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="admin.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <title>Admin</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="admin.css" />
-  <title>Admin</title>
-</head>
+  <body>
+    <section class="iframe-container">
+      <iframe id="canvas-viewer" src="/"></iframe>
+    </section>
 
-<body>
+    <button id="clear-canvas">
+      <i class="fa fa-shield-halved" aria-hidden="true"></i> Clear Canvas
+    </button>
+    <!-- <button id="refresh-table">Refresh Table</button> -->
 
-  <section class="iframe-container">
-    <iframe id="canvas-viewer" src="/"></iframe>
-  </section>
-
-  <button id="clear-canvas">Clear Canvas</button>
-  <!-- <button id="refresh-table">Refresh Table</button> -->
-
-
-  <section id="data-table">
-    <table>
-      <thead>
-        <tr>
-          <th>SessionID</th>
-          <th>Session's Drawings</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (drawingData.length===0) { %>
+    <section id="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>SessionID</th>
+            <th>Session's Drawings</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (drawingData.length===0) { %>
           <tr>
             <td colspan="3">No data available</td>
           </tr>
-          <% } else { %>
-            <% const sessionIDs=new Set(); %>
-              <%drawingData.forEach(entry=> sessionIDs.add(entry.sessionID)); %>
-                <%sessionIDs.forEach(sessionID=> { %>
-                  <tr>
-                    <td><strong>SessionID: <%= sessionID %></strong></td>
-                    <td>
-                      <canvas class="session-canvas" data-session-id="<%= sessionID %>"></canvas>
-                    </td>
-                    <td>
-                      <button class="delete-btn" data-session-id="<%= sessionID %>">Delete</button>
-                      <button class="ban-btn" data-session-id="<%= sessionID %>">Ban</button>
-                    </td>
-                  </tr>
-                  <% }); %>
-                    <% } %>
-      </tbody>
-    </table>
-  </section>
+          <% } else { %> <% const sessionIDs=new Set(); %>
+          <%drawingData.forEach(entry=> sessionIDs.add(entry.sessionID)); %>
+          <%sessionIDs.forEach(sessionID=> { %>
+          <tr>
+            <td><strong>SessionID: <%= sessionID %></strong></td>
+            <td>
+              <canvas
+                class="session-canvas"
+                data-session-id="<%= sessionID %>"
+              ></canvas>
+            </td>
+            <td>
+              <button class="delete-btn" data-session-id="<%= sessionID %>">
+                Delete
+              </button>
+              <button class="ban-btn" data-session-id="<%= sessionID %>">
+                Ban
+              </button>
+            </td>
+          </tr>
+          <% }); %> <% } %>
+        </tbody>
+      </table>
+    </section>
 
-  <script src="admin.js"></script>
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-</body>
-
+    <script src="admin.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  </body>
 </html>

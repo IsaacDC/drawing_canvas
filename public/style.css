@@ -50,10 +50,12 @@ button {
   background-color: #ff9800;
   display: none;
 }
-
 #pencil {
   background-color: #2196F3;
   display: none;
+}
+#undo{
+  background-color: #ff9800;
 }
 
 #eraser.active {
