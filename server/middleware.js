@@ -3,7 +3,7 @@ const db = require("../databases/dbChooser");
 
 const banCheckMiddleware = (req, res, next) => {
   if (req.session) {
-    db.isSessionIDBanned(req.sessionID, (err, isBanned) => {
+    db.isSessionBanned(req.sessionID, (err, isBanned) => {
       if (err) {
         console.error("Error checking if sessionID is banned:", err);
         res.status(500).send("Server error");

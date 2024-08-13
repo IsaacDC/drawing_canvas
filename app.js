@@ -37,13 +37,9 @@ app.use(express.static("admin"));
 
 app.get("/admin", (req, res) => {
   db.getAllDrawingData((drawingData) => {
-    res.render("admin", { drawingData, renderCanvas: true });
-  });
-});
-
-app.get("/admin/sessions", (req, res) => {
-  db.uniqueSessionIds((sessionId) => {
-    res.json(sessionId);
+    db.getBannedSessions((bannedSessions) => {
+      res.render("admin", { drawingData, bannedSessions });
+    });
   });
 });
 
@@ -61,8 +57,34 @@ app.post("/ban/:sessionId", (req, res) => {
       console.error("Error banning sessionID:", err);
       res.status(500).json({ success: false, message: "Server error" });
     } else {
+      io.sockets.sockets.forEach((socket) => {
+        if (socket.request.sessionID === sessionId) {
+          socket.emit("banUser");
+        }
+      });
       res.json({ success: true });
     }
+  });
+});
+
+app.delete("/unban/:sessionId", (req, res) => {
+  const sessionId = req.params.sessionId;
+  db.unbanSessionId(sessionId, (err) => {
+    if (err) {
+      console.error("Error unbanning sessionID:", err);
+      res.status(500).json({ success: false, message: "Server error" });
+    } else {
+      res.json({ success: true });
+    }
+  });
+});
+
+app.get("/getBannedSessions", (req, res) => {
+  db.getBannedSessions((rows) => {
+    res.json({
+      success: true,
+      bannedSessions: rows.map((row) => row.sessionID),
+    });
   });
 });
 
@@ -72,9 +94,16 @@ app.delete("/clearCanvas", (req, res) => {
   });
 });
 
-const clients = {};
-
 io.use(wrap(sessionMiddleware));
+io.use((socket, next) => {
+  const session = socket.request.session;
+  if (session && session.id) {
+    next();
+  } else {
+    next(new Error("Unauthorized"));
+  }
+});
+
 io.on("connection", (socket) => {
   const sessionId = socket.request.sessionID;
 
@@ -83,29 +112,28 @@ io.on("connection", (socket) => {
   });
 
   // start drawing event
-  socket.on("startDrawing", ({ x, y, width }) => {
-    const data = { type: "start", x, y, color: clients[socket.id], width };
+  socket.on("startDrawing", ({ x, y, color, width }) => {
+    const data = { type: "start", x, y, color, width, socketId: socket.id};
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("startDrawing", data);
   });
 
   // draw event
-  socket.on("draw", ({ x, y, width }) => {
-    const data = { type: "draw", x, y, color: clients[socket.id], width };
+  socket.on("draw", ({ x, y, color, width }) => {
+    const data = { type: "draw", x, y, color, width, socketId: socket.id};
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("draw", data);
   });
 
   // stop drawing event
   socket.on("stopDrawing", () => {
-    const data = { type: "stop" };
+    const data = { type: "stop", socketId: socket.id};
     db.insertDrawingData(sessionId, data);
     socket.broadcast.emit("stopDrawing");
   });
 
   // change stroke color event
   socket.on("changeStrokeColor", (color) => {
-    clients[socket.id] = color;
     socket.broadcast.emit("changeStrokeColor", { socketId: socket.id, color });
   });
 
@@ -118,11 +146,6 @@ io.on("connection", (socket) => {
   socket.on("clearDrawings", () => {
     db.deleteDrawingsBySessionID(sessionId);
     socket.broadcast.emit("clearSessionsDrawings", sessionId);
-  });
-
-  // disconnect event
-  socket.on("disconnect", () => {
-    delete clients[socket.id];
   });
 });
 

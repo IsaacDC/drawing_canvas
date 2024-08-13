@@ -1,7 +1,8 @@
 body {
   font-family: Arial, sans-serif;
-  margin: 0;
+  background-color: white;
   padding: 0;
+  margin: 0;
 }
 
 canvas {
@@ -20,7 +21,7 @@ canvas {
   left: 10px;
 }
 
-button {
+#clear-all #undo {
   width: 3em;
   height: 2.4em;
   border: none;
@@ -38,15 +39,6 @@ button {
   font-size: 16px;
   background-color: #f44336;
   cursor: pointer;
-}
-
-#undo {
-  background-color: #ff9800;
-}
-
-button:active {
-  box-shadow: 0 5px #666;
-  transform: translateY(4px);
 }
 
 #stroke-color {
@@ -125,7 +117,7 @@ input[type="range"]:hover {
 #slider-value {
   gap: 0px;
   border: none;
-  width: 2em;
+  width: 3.2em;
   text-align: center;
   font-size: 16px;
 }

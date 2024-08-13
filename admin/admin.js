@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
   const socket = io.connect();
 
@@ -68,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   renderDrawings();
 
-
   //Clears Canvas of all drawings
   const clearCanvas = document.getElementById("clear-canvas");
   clearCanvas.addEventListener("click", () => {
@@ -130,8 +128,45 @@ document.addEventListener("DOMContentLoaded", function () {
           .then((data) => {
             if (data.success) {
               alert("Session ID banned successfully");
+              location.reload();
+              fetch(`/delete/${sessionId}`, {
+                method: "DELETE",
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (!data.success) {
+                    alert("Error deleting drawings");
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                });
             } else {
               alert("Error banning session ID");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    });
+  });
+
+  const unbanButtons = document.querySelectorAll(".unban-btn");
+  unbanButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const sessionId = this.getAttribute("data-session-id");
+      if (confirm(`Are you sure you want to unban session ID: ${sessionId}?`)) {
+        fetch(`/unban/${sessionId}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              location.reload();
+              alert("Session ID unbanned successfully");
+            } else {
+              alert("Error unbanning session ID");
             }
           })
           .catch((error) => {
