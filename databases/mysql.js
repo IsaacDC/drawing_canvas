@@ -4,7 +4,6 @@ const config = require("../server/config");
 const pool = mysql.createPool(config.database);
 
 module.exports = {
-
   //insert drawing data
   insertDrawingData(sessionID, data) {
     const { type, x, y, color, width } = data;

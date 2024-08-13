@@ -1,37 +1,6 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: white;
-  padding: 0;
-  margin: 0;
-}
-
-button {
+button{
   background-color: #f44336;
-}
-
-button:hover {
-  background-color: #d32f2f;
-}
-
-.iframe-container {
-  display: flex;
-  justify-content: center;
-}
-
-#canvas-viewer {
-  border: 1px solid rgba(76, 117, 175, 0.2);
-  width: 1330px;
-  height: 820px;
-}
-
-.session-canvas {
-  border: solid black 1px;
-  width: 320px;
-  height: 180px;
-}
-
-#clear-canvas {
-  color: white;
+  color: rgb(255, 255, 255);
   padding: 10px 20px;
   margin: 10px;
   border: none;
@@ -40,8 +9,22 @@ button:hover {
   font-size: 16px;
 }
 
-i{
+button:hover {
+  background-color: #d32f2f;
+}
+
+i {
   margin-right: 5px;
+}
+
+#data-table{
+  display: flex;
+}
+
+.session-canvas {
+  border: solid black 1px;
+  width: 320px;
+  height: 180px;
 }
 
 table {

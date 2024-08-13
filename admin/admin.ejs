@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="adminCanvas.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -12,9 +13,38 @@
   </head>
 
   <body>
-    <section class="iframe-container">
+    <canvas id="canvas"></canvas>
+    <div class="tools">
+      <!-- <button id="clear-all" class="fa-solid fa-trash"></button>
+      <button id="undo" class="fa-solid fa-undo"></button> -->
+
+      <input
+        title="color-picker"
+        type="color"
+        id="stroke-color"
+        name="color"
+        value="#00000"
+      />
+      <input
+        title="width-slider"
+        type="range"
+        min="1"
+        max="100"
+        value="5"
+        id="stroke-width"
+      />
+      <input
+        title="slider-value"
+        type="number"
+        min="1"
+        max="100"
+        value="5"
+        id="slider-value"
+      />
+    </div>
+    <!-- <section class="iframe-container">
       <iframe id="canvas-viewer" src="/"></iframe>
-    </section>
+    </section> -->
 
     <button id="clear-canvas">
       <i class="fa fa-shield-halved" aria-hidden="true"></i> Clear Canvas
@@ -22,7 +52,7 @@
     <!-- <button id="refresh-table">Refresh Table</button> -->
 
     <section id="data-table">
-      <table>
+      <table id="drawings-data-table">
         <thead>
           <tr>
             <th>SessionID</th>
@@ -58,9 +88,40 @@
           <% }); %> <% } %>
         </tbody>
       </table>
+      <!--WIP-->
+      <table id="banned-sessions-table">
+        <thead>
+          <tr>
+            <th>Banned SessionIDs</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (bannedSessions.length === 0) { %>
+          <tr>
+            <td colspan="2">No banned sessions</td>
+          </tr>
+          <% } else { %> <% const sessionIDs = []; %> <%
+          bannedSessions.forEach(entry => sessionIDs.push(entry.sessionID)); %>
+          <%sessionIDs.forEach(sessionID=> { %>
+          <tr>
+            <td>
+              <strong>SessionID: <%= sessionID %></strong>
+            </td>
+            <td>
+              <button class="unban-btn" data-session-id="<%= sessionID %>">
+                Unban
+              </button>
+            </td>
+          </tr>
+          <% }); %> <% } %>
+        </tbody>
+      </table>
     </section>
 
     <script src="admin.js"></script>
+    <script src="adminCanvas.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   </body>
 </html>

@@ -34,7 +34,7 @@ db.serialize(() => {
 });
 
 module.exports = {
-  // Insert drawing data
+  //Insert drawing data
   insertDrawingData(sessionID, data) {
     const { type, x, y, color, width } = data;
 
@@ -76,18 +76,6 @@ module.exports = {
     });
   },
 
-  tempClearCanvas(sessionID) {
-    db.run(
-      "UPDATE drawings SET color = 'rgba(255, 255, 255, 0)' WHERE sessionID = ?",
-      [sessionID],
-      (err) => {
-        if (err) {
-          console.error("Error updating drawing data:", err);
-        }
-      }
-    );
-  },
-
   // Delete all drawings
   clearCanvas(callback) {
     db.run("DELETE FROM drawings", (err) => {
@@ -116,7 +104,7 @@ module.exports = {
   },
 
   // Check if a sessionID is banned
-  isSessionIDBanned(sessionID, callback) {
+  isSessionBanned(sessionID, callback) {
     db.get(
       "SELECT * FROM bannedSessionIDs WHERE sessionID = ?",
       [sessionID],
@@ -130,8 +118,18 @@ module.exports = {
     );
   },
 
+  getBannedSessions(callback){
+    db.all("SELECT * FROM bannedSessionIDs", (err, rows) => {
+      if (err) {
+        console.error("Error getting banned sessions:", err);
+        return;
+      }
+      callback(rows);
+    });
+  },
+
   // Remove a banned sessionID
-  removeBannedSessionID(sessionID, callback) {
+  unbanSessionId(sessionID, callback) {
     db.run(
       "DELETE FROM bannedSessionIDs WHERE sessionID = ?",
       [sessionID],
@@ -145,7 +143,7 @@ module.exports = {
     );
   },
 
-  // Get unique session IDs
+  //Get unique session IDs
   uniqueSessionIds(callback) {
     db.all("SELECT DISTINCT sessionID FROM drawings", (err, rows) => {
       if (err) {
