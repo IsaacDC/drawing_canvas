@@ -129,7 +129,7 @@ io.on("connection", (socket) => {
   socket.on("stopDrawing", ({ socketId }) => {
     const data = { type: "stop", socketId };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("stopDrawing");
+    socket.broadcast.emit("stopDrawing", data);
   });
 
   // change stroke color event
