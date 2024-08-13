@@ -148,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
       y: lastMouseY,
       color,
       width: strokeWidth,
+      socketId: socket.id,
     });
   }
   function draw(e) {
@@ -159,14 +160,20 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.lineTo(x, y);
     ctx.stroke();
 
-    socket.emit("draw", { x, y, color, width: strokeWidth });
+    socket.emit("draw", {
+      x,
+      y,
+      color,
+      width: strokeWidth,
+      socketId: socket.id,
+    });
   }
 
   function stopDrawing(e) {
     if (!isDrawing) return;
     isDrawing = false;
     ctx.beginPath();
-    socket.emit("stopDrawing");
+    socket.emit("stopDrawing", { socketId: socket.id });
   }
 
   let activeDrawings = new Map();
