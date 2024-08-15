@@ -1,4 +1,5 @@
-document.addEventListener("DOMContentLoaded", function () {
+"use strict";
+document.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect();
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
@@ -7,10 +8,12 @@ document.addEventListener("DOMContentLoaded", function () {
   canvas.height = 720;
 
   let isDrawing = false;
-  let lastMouseX = 0;
-  let lastMouseY = 0;
+  let lastX = 0;
+  let lastY = 0;
   let color = "#000000";
   let strokeWidth = 5;
+
+  const otherUsers = {};
 
   // mouse events
   $(canvas).on("mousedown", startDrawing);
@@ -27,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
   //Clears drawings
   $("#clear-all").on("click", () => {
     if (confirm("Are you sure you want to clear all drawings?")) {
+      location.reload();
       socket.emit("clearDrawings");
     }
   });
@@ -53,46 +57,51 @@ document.addEventListener("DOMContentLoaded", function () {
   // Update slider and stroke width when input value changes
   $("#slider-value").on("input", function () {
     let value = $(this).val();
-    value = Math.max(1, Math.min(value, 100));
+    value = Math.max(0, Math.min(value, 100));
     updateValues(value);
   });
   // invalid stroke value handler
   $("#slider-value").on("blur", function () {
     let value = $(this).val();
-    value = Math.max(1, Math.min(value, 100)); // Clamp value between 1 and 100
+    if (value === "" || value < 1) {
+      value = 1;
+    } else {
+      value = Math.min(value, 100);
+    }
     updateValues(value);
   });
 
   //begins the drawing process
-  function startDrawing(e) {
-    e.preventDefault();
-    isDrawing = true;
-
+  function getCoordinates(e) {
     const rect = canvas.getBoundingClientRect();
-    let x, y;
-
-    // Mouse events
     if (e.type.startsWith("mouse")) {
-      [x, y] = [e.offsetX, e.offsetY];
+      return { x: e.offsetX, y: e.offsetY };
     } else {
-      // Touch events
       const touch = e.touches[0];
-      [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      };
     }
+  }
 
-    [lastMouseX, lastMouseY] = [x, y];
+  function startDrawing(e) {
+    isDrawing = true;
+    const { x, y } = getCoordinates(e);
+    [lastX, lastY] = [x, y];
 
     ctx.beginPath();
-    ctx.moveTo(lastMouseX, lastMouseY);
+    ctx.moveTo(lastX, lastY);
     ctx.lineCap = "round";
     ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = color;
 
     socket.emit("startDrawing", {
-      x: lastMouseX,
-      y: lastMouseY,
+      x: lastX,
+      y: lastY,
       color,
-      width: $("#stroke-width").val(),
+      width: strokeWidth,
+      socketId: socket.id,
     });
   }
 
@@ -100,33 +109,26 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!isDrawing) return;
     e.preventDefault();
 
-    const rect = canvas.getBoundingClientRect();
-    let x, y;
-
-    // mouse events
-    if (e.type.startsWith("mouse")) {
-      [x, y] = [e.offsetX, e.offsetY];
-    }
-    // touch events
-    else {
-      const touch = e.touches[0];
-      [x, y] = [touch.clientX - rect.left, touch.clientY - rect.top];
-    }
+    const { x, y } = getCoordinates(e);
 
     ctx.lineTo(x, y);
     ctx.stroke();
 
-    socket.emit("draw", { x, y, color, width: strokeWidth });
+    socket.emit("draw", {
+      x,
+      y,
+      color,
+      width: strokeWidth,
+      socketId: socket.id,
+    });
   }
 
   function stopDrawing(e) {
     if (!isDrawing) return;
-    e.preventDefault();
     isDrawing = false;
     ctx.beginPath();
-    socket.emit("stopDrawing");
+    socket.emit("stopDrawing", { socketId: socket.id });
   }
-
   // Incoming socket events
   socket.on("loadDrawingData", (drawingData) => {
     drawingData.forEach((data) => {
@@ -148,26 +150,37 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  //draws on the non-drawing client(s) screen(s)
-  socket.on("startDrawing", ({ x, y, color, width }) => {
+  socket.on("banUser", () => {
+    alert("Your access has been revoked.");
+    socket.disconnect();
+  });
+
+  // draws on the non-drawing client(s) screen(s)
+  socket.on("incomingStartDrawing", ({ x, y, color, width, socketId }) => {
+    otherUsers[socketId] = { x, y, color, width };
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
-    isDrawing = true;
   });
 
-  socket.on("draw", ({ x, y, color, width }) => {
-    ctx.lineTo(x, y);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
-    ctx.stroke();
+  socket.on("incomingDraw", ({ x, y, color, width, socketId }) => {
+    if (!otherUsers[socketId]) {
+      otherUsers[socketId] = { x, y, color, width };
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(otherUsers[socketId].x, otherUsers[socketId].y);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.stroke();
+      otherUsers[socketId] = { x, y, color, width };
+    }
   });
 
-  socket.on("stopDrawing", () => {
-    isDrawing = false;
+  socket.on("incomingStopDrawing", ({socketId}) => {
+    delete otherUsers[socketId];
     ctx.beginPath();
   });
 
@@ -181,9 +194,5 @@ document.addEventListener("DOMContentLoaded", function () {
     if (socketId !== socket.id) {
       ctx.lineWidth = width;
     }
-  });
-
-  socket.on("clearSessionsDrawings", () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 });

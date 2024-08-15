@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const socket = io.connect();
-
   // function login() {
   //   let username = "";
   //   let password = "";
@@ -29,41 +27,46 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // login();
 
-  //loads drawings for each canvas per session respectfully
+  //loads drawings for each canvas per session
   function renderDrawings() {
-    socket.on("loadDrawingData", (drawingData) => {
-      const sessionCanvases = document.querySelectorAll(".session-canvas");
+    fetch("/getDrawingData")
+      .then((response) => response.json())
+      .then((drawingData) => {
+        const sessionCanvases = document.querySelectorAll(".session-canvas");
 
-      sessionCanvases.forEach((canvas) => {
-        const sessionId = canvas.getAttribute("data-session-id");
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        sessionCanvases.forEach((canvas) => {
+          const sessionId = canvas.getAttribute("data-session-id");
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const scaleFactor = Math.min(canvas.width / 1280, canvas.height / 720);
-        ctx.scale(scaleFactor, scaleFactor);
+          const scaleFactor = Math.min(
+            canvas.width / 1280,
+            canvas.height / 720
+          );
+          ctx.scale(scaleFactor, scaleFactor);
 
-        const filteredData = drawingData.filter(
-          (data) => data.sessionID === sessionId
-        );
-        filteredData.forEach((data) => {
-          if (data.type === "start") {
-            ctx.beginPath();
-            ctx.moveTo(data.x, data.y);
-            ctx.strokeStyle = data.color;
-            ctx.lineWidth = data.width;
-            ctx.lineCap = "round";
-          } else if (data.type === "draw") {
-            ctx.lineTo(data.x, data.y);
-            ctx.strokeStyle = data.color;
-            ctx.lineWidth = data.width;
-            ctx.lineCap = "round";
-            ctx.stroke();
-          } else if (data.type === "stop") {
-            ctx.beginPath();
-          }
+          const filteredData = drawingData.filter(
+            (data) => data.sessionID === sessionId
+          );
+          filteredData.forEach((data) => {
+            if (data.type === "start") {
+              ctx.beginPath();
+              ctx.moveTo(data.x, data.y);
+              ctx.strokeStyle = data.color;
+              ctx.lineWidth = data.width;
+              ctx.lineCap = "round";
+            } else if (data.type === "draw") {
+              ctx.lineTo(data.x, data.y);
+              ctx.strokeStyle = data.color;
+              ctx.lineWidth = data.width;
+              ctx.lineCap = "round";
+              ctx.stroke();
+            } else if (data.type === "stop") {
+              ctx.beginPath();
+            }
+          });
         });
       });
-    });
   }
   renderDrawings();
 

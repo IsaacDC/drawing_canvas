@@ -79,6 +79,12 @@ app.delete("/unban/:sessionId", (req, res) => {
   });
 });
 
+app.get('/getDrawingData', (req, res) => {
+  db.getAllDrawingData((drawingData) => {
+    res.json(drawingData);
+  });
+});
+
 app.get("/getBannedSessions", (req, res) => {
   db.getBannedSessions((rows) => {
     res.json({
