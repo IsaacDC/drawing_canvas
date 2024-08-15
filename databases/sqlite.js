@@ -142,26 +142,4 @@ module.exports = {
       }
     );
   },
-
-  //Get unique session IDs
-  uniqueSessionIds(callback) {
-    db.all("SELECT DISTINCT sessionID FROM drawings", (err, rows) => {
-      if (err) {
-        console.error("Error getting unique session IDs:", err);
-        return;
-      }
-      callback(rows);
-    });
-  },
-
-  // Close the database connection
-  closeConnection() {
-    db.close((err) => {
-      if (err) {
-        console.error("Error closing database connection:", err);
-      } else {
-        console.log("Database connection closed successfully.");
-      }
-    });
-  },
-};
+}

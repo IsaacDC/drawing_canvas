@@ -29,21 +29,6 @@ module.exports = {
     });
   },
 
-  getDrawingsBySessionID(sessionId, callback) {
-    pool.query(
-      "SELECT * FROM drawings WHERE sessionID = ?",
-      [sessionId],
-      (err, rows) => {
-        if (err) {
-          console.error("Error getting drawings by session ID:", err);
-          callback(err, null);
-        } else {
-          callback(null, rows);
-        }
-      }
-    );
-  },
-
   //deletes all drawings for a specific session ID
   deleteDrawingsBySessionID(sessionId) {
     pool.query(
@@ -100,7 +85,7 @@ module.exports = {
   },
 
   // Remove a banned sessionID
-  removeBannedSessionID(sessionID, callback) {
+  unbanSessionId(sessionID, callback) {
     pool.query(
       "DELETE FROM bannedSessionIDs WHERE sessionID = ?",
       [sessionID],

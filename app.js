@@ -79,6 +79,12 @@ app.delete("/unban/:sessionId", (req, res) => {
   });
 });
 
+app.get('/getDrawingData', (req, res) => {
+  db.getAllDrawingData((drawingData) => {
+    res.json(drawingData);
+  });
+});
+
 app.get("/getBannedSessions", (req, res) => {
   db.getBannedSessions((rows) => {
     res.json({
@@ -115,21 +121,22 @@ io.on("connection", (socket) => {
   socket.on("startDrawing", ({ x, y, color, width, socketId }) => {
     const data = { type: "start", x, y, color, width, socketId };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("startDrawing", data);
+    socket.broadcast.emit("incomingStartDrawing", data);
   });
 
   // draw event
   socket.on("draw", ({ x, y, color, width, socketId }) => {
     const data = { type: "draw", x, y, color, width, socketId };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("draw", data);
+    socket.broadcast.emit("incomingDraw", data);
   });
 
   // stop drawing event
   socket.on("stopDrawing", ({ socketId }) => {
     const data = { type: "stop", socketId };
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("stopDrawing", data);
+    socket.broadcast.emit("incomingStopDrawing", data);
+
   });
 
   // change stroke color event
