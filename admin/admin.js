@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // login();
 
+
+
   //loads drawings for each canvas per session
   function renderDrawings() {
     fetch("/getDrawingData")
@@ -39,9 +41,23 @@ document.addEventListener("DOMContentLoaded", function () {
           const ctx = canvas.getContext("2d");
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+          function drawLine(x1, y1, x2, y2, color, width, emit) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = "round";
+            ctx.stroke();
+        
+            if (emit) {
+              socket.emit("draw", { x1, y1, x2, y2, color, width });
+            }
+          }
+
           const scaleFactor = Math.min(
-            canvas.width / 1280,
-            canvas.height / 720
+            canvas.width / 1920,
+            canvas.height / 1080
           );
           ctx.scale(scaleFactor, scaleFactor);
 
@@ -49,21 +65,15 @@ document.addEventListener("DOMContentLoaded", function () {
             (data) => data.sessionID === sessionId
           );
           filteredData.forEach((data) => {
-            if (data.type === "start") {
-              ctx.beginPath();
-              ctx.moveTo(data.x, data.y);
-              ctx.strokeStyle = data.color;
-              ctx.lineWidth = data.width;
-              ctx.lineCap = "round";
-            } else if (data.type === "draw") {
-              ctx.lineTo(data.x, data.y);
-              ctx.strokeStyle = data.color;
-              ctx.lineWidth = data.width;
-              ctx.lineCap = "round";
-              ctx.stroke();
-            } else if (data.type === "stop") {
-              ctx.beginPath();
-            }
+            drawLine(
+              data.x1,
+              data.y1,
+              data.x2,
+              data.y2,
+              data.color,
+              data.width,
+              false
+            );
           });
         });
       });

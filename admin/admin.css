@@ -1,12 +1,7 @@
-button{
-  background-color: #f44336;
-  color: rgb(255, 255, 255);
+#clear-canvas {
   padding: 10px 20px;
   margin: 10px;
-  border: none;
   border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
 }
 
 button:hover {
@@ -17,7 +12,7 @@ i {
   margin-right: 5px;
 }
 
-#data-table{
+#data-table {
   display: flex;
 }
 
@@ -25,6 +20,8 @@ i {
   border: solid black 1px;
   width: 320px;
   height: 180px;
+  display: block;
+  margin: 10px auto;
 }
 
 table {
@@ -32,19 +29,26 @@ table {
   border-collapse: collapse;
   margin: 20px 10px 20px 10px;
   background-color: #ffffff;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 th,
 td {
   padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ffffff;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid #e0e0e0;
 }
+
 
 th {
   background-color: rgb(76, 117, 175);
   color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+tr:nth-child(even) {
+  background-color: #f8f8f8;
 }
 
 th:first-child,
@@ -68,10 +72,12 @@ tr:hover {
 }
 
 .delete-btn,
-.ban-btn {
-  color: white;
-  padding: 8px 16px;
+.ban-btn, .unban-btn {
+  padding: 8px 12px;
+  margin: 2px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
 }

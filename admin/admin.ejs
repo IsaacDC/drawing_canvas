@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./reset.css" />
+    <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="admin.css" />
-    <link rel="stylesheet" href="adminCanvas.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -13,10 +14,11 @@
   </head>
 
   <body>
-    <canvas id="canvas"></canvas>
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
     <div class="tools">
-      <!-- <button id="clear-all" class="fa-solid fa-trash"></button>
-      <button id="undo" class="fa-solid fa-undo"></button> -->
+      <button id="trash-btn" class="fa-solid fa-trash"></button>
 
       <input
         title="color-picker"
@@ -42,14 +44,10 @@
         id="slider-value"
       />
     </div>
-    <!-- <section class="iframe-container">
-      <iframe id="canvas-viewer" src="/"></iframe>
-    </section> -->
 
     <button id="clear-canvas">
       <i class="fa fa-shield-halved" aria-hidden="true"></i> Clear Canvas
     </button>
-    <!-- <button id="refresh-table">Refresh Table</button> -->
 
     <section id="data-table">
       <table id="drawings-data-table">
@@ -88,7 +86,6 @@
           <% }); %> <% } %>
         </tbody>
       </table>
-      <!--WIP-->
       <table id="banned-sessions-table">
         <thead>
           <tr>
@@ -119,9 +116,8 @@
       </table>
     </section>
 
-    <script src="admin.js"></script>
-    <script src="adminCanvas.js"></script>
+    <script type="module" src="admin.js"></script>
+    <script type="module" src="./client.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   </body>
 </html>

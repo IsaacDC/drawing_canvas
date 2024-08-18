@@ -9,10 +9,13 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS drawings (
     sessionID TEXT,
     type TEXT,
-    x REAL,
-    y REAL,
+    x1 REAL,
+    y1 REAL,
+    x2 REAL,
+    y2 REAL,
     color TEXT DEFAULT '#000000',
-    width INTEGER DEFAULT 5
+    width INTEGER DEFAULT 5,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
   )`,
     (err) => {
       if (err) {
@@ -36,18 +39,18 @@ db.serialize(() => {
 module.exports = {
   //Insert drawing data
   insertDrawingData(sessionID, data) {
-    const { type, x, y, color, width } = data;
+    const { x1, y1, x2, y2, color, width } = data;
 
     let sql, params;
 
     if (color) {
       sql =
-        "INSERT INTO drawings (sessionID, type, x, y, color, width) VALUES (?, ?, ?, ?, ?, ?)";
-      params = [sessionID, type, x, y, color, width];
+        "INSERT INTO drawings (sessionID,type, x1, y1, x2, y2, color, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+      params = [sessionID, "draw", x1, y1, x2, y2, color, width];
     } else {
       sql =
-        "INSERT INTO drawings (sessionID, type, x, y, width) VALUES (?, ?, ?, ?, ?)";
-      params = [sessionID, type, x, y, width];
+        "INSERT INTO drawings (sessionID,type, x1, y1, x2, y2, width) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      params = [sessionID, "draw", x1, y1, x2, y2, width];
     }
 
     db.run(sql, params, (err) => {
@@ -58,7 +61,7 @@ module.exports = {
   },
   // Get all drawing data
   getAllDrawingData(callback) {
-    db.all("SELECT * FROM drawings", (err, rows) => {
+    db.all("SELECT * FROM drawings ORDER BY timestamp ASC", [], (err, rows) => {
       if (err) {
         console.error("Error getting all drawing data:", err);
         return;
@@ -118,7 +121,7 @@ module.exports = {
     );
   },
 
-  getBannedSessions(callback){
+  getBannedSessions(callback) {
     db.all("SELECT * FROM bannedSessionIDs", (err, rows) => {
       if (err) {
         console.error("Error getting banned sessions:", err);
@@ -142,4 +145,4 @@ module.exports = {
       }
     );
   },
-}
+};

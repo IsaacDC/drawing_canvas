@@ -9,11 +9,11 @@ const server = createServer(app);
 
 const db = require("./databases/dbChooser");
 const config = require("./server/config");
-const { banCheckMiddleware } = require("./server/middleware");
+const { banCheckMiddleware } = require("./middleware/middleware");
 
 const io = new Server(server, config.cors);
 
-const WorkerPool = require("./server/workerPool");
+const WorkerPool = require("./worker_threads/workerPool");
 const workers = new WorkerPool(1, "./drawingWorker");
 
 app.use(sessionMiddleware);
@@ -118,41 +118,14 @@ io.on("connection", (socket) => {
   });
 
   // start drawing event
-  socket.on("startDrawing", ({ x, y, color, width, socketId }) => {
-    const data = { type: "start", x, y, color, width, socketId };
+  socket.on("draw", (data) => {
     db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("incomingStartDrawing", data);
-  });
-
-  // draw event
-  socket.on("draw", ({ x, y, color, width, socketId }) => {
-    const data = { type: "draw", x, y, color, width, socketId };
-    db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("incomingDraw", data);
-  });
-
-  // stop drawing event
-  socket.on("stopDrawing", ({ socketId }) => {
-    const data = { type: "stop", socketId };
-    db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("incomingStopDrawing", data);
-
-  });
-
-  // change stroke color event
-  socket.on("changeStrokeColor", (color) => {
-    socket.broadcast.emit("changeStrokeColor", { socketId: socket.id, color });
-  });
-
-  //change stroke width event
-  socket.on("changeStrokeWidth", (width) => {
-    socket.broadcast.emit("changeStrokeWidth", { socketId: socket.id, width });
+    socket.broadcast.emit("draw", data);
   });
 
   // clear drawings event
-  socket.on("clearDrawings", () => {
+  socket.on("trashDrawings", () => {
     db.deleteDrawingsBySessionID(sessionId);
-    socket.broadcast.emit("clearSessionsDrawings", sessionId);
   });
 });
 
