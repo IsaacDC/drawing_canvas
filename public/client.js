@@ -20,8 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mouseleave", stopDrawing);
 
   // Touch events
-  canvas.addEventListener("touchstart", startDrawing);
-  canvas.addEventListener("touchmove", draw);
+  canvas.addEventListener("touchstart", touchStart);
+  canvas.addEventListener("touchmove", touchMove);
   canvas.addEventListener("touchend", stopDrawing);
   canvas.addEventListener("touchcancel", stopDrawing);
 
@@ -100,6 +100,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function stopDrawing() {
     isDrawing = false;
+  }
+
+  function touchStart(e){
+    if (e.touches.length === 1){
+      startDrawing(e);
+    }
+  }
+
+  function touchMove(e){
+    if (e.touches.length === 1){
+      draw(e);
+    }
   }
 
   function drawLine(x1, y1, x2, y2, color, width, emit) {

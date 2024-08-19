@@ -6,13 +6,8 @@ body {
   overflow-x: auto;
 }
 
-.canvas-container {
-  width: 960px;
-  height: 540px;
-  margin: 20px;
-}
-
 canvas {
+  margin: 20px;
   background-color: white;
 }
 
@@ -28,13 +23,17 @@ button {
 }
 
 .tools {
+  position: fixed;
+  bottom: 0;
   width: 100vw;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
   padding: 10px 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 #trash-btn {
