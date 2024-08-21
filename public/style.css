@@ -1,28 +1,13 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif !important;
   margin: 0;
   padding: 0;
-}
-
-canvas {
-  margin: 10px;
-  border: 1px solid black;
-  background-color: white;
-}
-
-.tools {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  margin: 10px;
-  position: sticky;
-  left: 10px;
+  background-color: #081e3f;
+  overflow-x: auto;
 }
 
 button {
-  width: 3em;
-  height: 2.4em;
+  background-color: #b6862c;
   border: none;
   color: white;
   text-align: center;
@@ -30,23 +15,41 @@ button {
   display: inline-block;
   cursor: pointer;
   border-radius: 8px;
+  padding: 10px 20px;
 }
 
-#clear-all {
-  width: 2em;
-  height: 2em;
-  font-size: 16px;
-  background-color: #f44336;
-  cursor: pointer;
-}
-
-#undo {
-  background-color: #ff9800;
+button:hover {
+  background-color: #a57328;
 }
 
 button:active {
-  box-shadow: 0 5px #666;
-  transform: translateY(4px);
+  transform: translateY(3px);
+}
+
+canvas {
+  margin: 20px;
+  background-color: white;
+}
+
+#offscreenCanvas {
+  display: none !important;
+}
+
+.tools-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 10px 0;
+}
+
+.tools {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 #stroke-color {
@@ -103,16 +106,8 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
-  background: #2196f3;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-input[type="range"]::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   background: #2196f3;
   cursor: pointer;
   border-radius: 50%;
@@ -125,7 +120,7 @@ input[type="range"]:hover {
 #slider-value {
   gap: 0px;
   border: none;
-  width: 2em;
+  width: 3em;
   text-align: center;
   font-size: 16px;
 }

@@ -11,8 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "connect-redis": "^7.1.1",
-    "connect-sqlite3": "^0.9.15",
-    "cookie-session": "^2.1.0",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
@@ -21,8 +19,6 @@
     "redis": "^4.6.15",
     "socket.io": "^4.7.5",
     "sqlite3": "^5.1.7",
-    "unique-names-generator": "^4.7.1",
-    "uuid": "^9.0.1",
-    "ws": "^8.17.1"
+    "uuid": "^9.0.1"
   }
 }

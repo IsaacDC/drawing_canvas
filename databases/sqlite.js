@@ -1,7 +1,8 @@
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("drawings.db");
 
-db.run("DROP TABLE IF EXISTS drawings");
+// Used to reset the schema
+// db.run("DROP TABLE IF EXISTS drawings");
 
 db.serialize(() => {
   // Create the drawings table
@@ -9,10 +10,13 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS drawings (
     sessionID TEXT,
     type TEXT,
-    x REAL,
-    y REAL,
+    x1 REAL,
+    y1 REAL,
+    x2 REAL,
+    y2 REAL,
     color TEXT DEFAULT '#000000',
-    width INTEGER DEFAULT 5
+    width INTEGER DEFAULT 5,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
   )`,
     (err) => {
       if (err) {
@@ -32,33 +36,30 @@ db.serialize(() => {
     }
   );
 });
-
 module.exports = {
-  //Insert drawing data
   insertDrawingData(sessionID, data) {
-    const { type, x, y, color, width } = data;
+    const { x1, y1, x2, y2, color, width } = data;
 
     let sql, params;
 
     if (color) {
       sql =
-        "INSERT INTO drawings (sessionID, type, x, y, color, width) VALUES (?, ?, ?, ?, ?, ?)";
-      params = [sessionID, type, x, y, color, width];
+        "INSERT INTO drawings (sessionID,type, x1, y1, x2, y2, color, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+      params = [sessionID, "draw", x1, y1, x2, y2, color, width];
     } else {
       sql =
-        "INSERT INTO drawings (sessionID, type, x, y, width) VALUES (?, ?, ?, ?, ?)";
-      params = [sessionID, type, x, y, width];
+        "INSERT INTO drawings (sessionID,type, x1, y1, x2, y2, width) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      params = [sessionID, "draw", x1, y1, x2, y2, width];
     }
-
     db.run(sql, params, (err) => {
       if (err) {
         console.error("Error inserting drawing data:", err);
       }
     });
   },
-  // Get all drawing data
+
   getAllDrawingData(callback) {
-    db.all("SELECT * FROM drawings", (err, rows) => {
+    db.all("SELECT * FROM drawings ORDER BY timestamp ASC", [], (err, rows) => {
       if (err) {
         console.error("Error getting all drawing data:", err);
         return;
@@ -76,7 +77,6 @@ module.exports = {
     });
   },
 
-  // Delete all drawings
   clearCanvas(callback) {
     db.run("DELETE FROM drawings", (err) => {
       if (err) {
@@ -88,10 +88,10 @@ module.exports = {
     });
   },
 
-  // Add a new banned sessionID
+  // ban a User
   banSessionID(sessionID, callback) {
     db.run(
-      "INSERT INTO bannedSessionIDs (sessionID) VALUES (?)",
+      "INSERT INTO bannedSessions (sessionID) VALUES (?)",
       [sessionID],
       (err) => {
         if (err) {
@@ -103,10 +103,9 @@ module.exports = {
     );
   },
 
-  // Check if a sessionID is banned
   isSessionBanned(sessionID, callback) {
     db.get(
-      "SELECT * FROM bannedSessionIDs WHERE sessionID = ?",
+      "SELECT * FROM bannedSessions WHERE sessionID = ?",
       [sessionID],
       (err, row) => {
         if (err) {
@@ -118,8 +117,8 @@ module.exports = {
     );
   },
 
-  getBannedSessions(callback){
-    db.all("SELECT * FROM bannedSessionIDs", (err, rows) => {
+  getBannedSessions(callback) {
+    db.all("SELECT * FROM bannedSessions", (err, rows) => {
       if (err) {
         console.error("Error getting banned sessions:", err);
         return;
@@ -131,7 +130,7 @@ module.exports = {
   // Remove a banned sessionID
   unbanSessionId(sessionID, callback) {
     db.run(
-      "DELETE FROM bannedSessionIDs WHERE sessionID = ?",
+      "DELETE FROM bannedSessions WHERE sessionID = ?",
       [sessionID],
       (err) => {
         if (err) {
@@ -142,4 +141,4 @@ module.exports = {
       }
     );
   },
-}
+};

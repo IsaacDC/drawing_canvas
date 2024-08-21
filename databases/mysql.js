@@ -6,21 +6,30 @@ const pool = mysql.createPool(config.database);
 module.exports = {
   //insert drawing data
   insertDrawingData(sessionID, data) {
-    const { type, x, y, color, width } = data;
-    pool.query(
-      "INSERT INTO drawings (sessionID, type, x, y, color, width) VALUES (?, ?, ?, ?, ?, ?)",
-      [sessionID, type, x, y, color, width],
-      (err) => {
-        if (err) {
-          console.error("Error inserting drawing data:", err);
-        }
+    const { x1, y1, x2, y2, color, width } = data;
+
+    let sql, params;
+
+    if (color) {
+      sql =
+        "INSERT INTO drawings (sessionID,type, x1, y1, x2, y2, color, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+      params = [sessionID, "draw", x1, y1, x2, y2, color, width];
+    } else {
+      sql =
+        "INSERT INTO drawings (sessionID,type, x1, y1, x2, y2, width) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      params = [sessionID, "draw", x1, y1, x2, y2, width];
+    }
+
+    pool.query(sql, params, (err) => {
+      if (err) {
+        console.error("Error inserting drawing data:", err);
       }
-    );
+    });
   },
 
   //gets all drawing data
   getAllDrawingData(callback) {
-    pool.query("SELECT * FROM drawings", (err, rows) => {
+    pool.query("SELECT * FROM drawings ORDER BY timestamp ASC", (err, rows) => {
       if (err) {
         console.error("Error getting all drawing data:" + err);
         return;
@@ -70,7 +79,7 @@ module.exports = {
   },
 
   // Check if a sessionID is banned
-  isSessionIDBanned(sessionID, callback) {
+  isSessionBanned(sessionID, callback) {
     pool.query(
       "SELECT * FROM bannedSessionIDs WHERE sessionID = ?",
       [sessionID],
@@ -82,6 +91,16 @@ module.exports = {
         }
       }
     );
+  },
+
+  getBannedSessions(callback) {
+    pool.query("SELECT * FROM bannedSessionIDs", (err, rows) => {
+      if (err) {
+        console.error("Error getting banned sessions:", err);
+        return;
+      }
+      callback(rows);
+    });
   },
 
   // Remove a banned sessionID
