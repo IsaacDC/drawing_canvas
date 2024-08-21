@@ -66,7 +66,7 @@ module.exports = {
   // Add a new banned sessionID
   banSessionID(sessionID, callback) {
     pool.query(
-      "INSERT INTO bannedSessionIDs (sessionID) VALUES (?)",
+      "INSERT INTO bannedSessions (sessionID) VALUES (?)",
       [sessionID],
       (err) => {
         if (err) {
@@ -81,7 +81,7 @@ module.exports = {
   // Check if a sessionID is banned
   isSessionBanned(sessionID, callback) {
     pool.query(
-      "SELECT * FROM bannedSessionIDs WHERE sessionID = ?",
+      "SELECT * FROM bannedSessions WHERE sessionID = ?",
       [sessionID],
       (err, result) => {
         if (err) {
@@ -94,7 +94,7 @@ module.exports = {
   },
 
   getBannedSessions(callback) {
-    pool.query("SELECT * FROM bannedSessionIDs", (err, rows) => {
+    pool.query("SELECT * FROM bannedSessions", (err, rows) => {
       if (err) {
         console.error("Error getting banned sessions:", err);
         return;
@@ -106,7 +106,7 @@ module.exports = {
   // Remove a banned sessionID
   unbanSessionId(sessionID, callback) {
     pool.query(
-      "DELETE FROM bannedSessionIDs WHERE sessionID = ?",
+      "DELETE FROM bannedSessions WHERE sessionID = ?",
       [sessionID],
       (err) => {
         if (err) {

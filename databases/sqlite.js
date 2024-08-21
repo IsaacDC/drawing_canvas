@@ -26,7 +26,7 @@ db.serialize(() => {
   );
 
   db.run(
-    `CREATE TABLE IF NOT EXISTS bannedSessionIDs (
+    `CREATE TABLE IF NOT EXISTS bannedSessions (
     sessionID TEXT
   )`,
     (err) => {
