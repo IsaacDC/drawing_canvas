@@ -40,6 +40,11 @@ Install the necessary packages:
 ```
 This will create the necessary MySQL database container and set up the application.
 
+To start the docker if it's not running, run the following command:
+```bash
+  docker start CONTAINER_NAME
+```
+
 
 ## Config Setup:
 
