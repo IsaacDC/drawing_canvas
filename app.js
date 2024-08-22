@@ -7,7 +7,9 @@ const { join } = require("node:path");
 const db = require("./databases/dbChooser");
 const config = require("./server/config");
 const { banCheckMiddleware } = require("./middleware/banCheckMiddleware");
+
 const WorkerPool = require("./worker_threads/workerPool");
+// You can change the amount of workers
 const workers = new WorkerPool(1, "./drawingWorker");
 
 const app = express();
@@ -87,6 +89,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(config.server.port, () => {
-  console.log(`Server running at http://127.0.0.1:${config.server.port}`);
+server.listen(config.server.port, config.server.domain, () => {
+  console.log(`Server running at ${config.server.domain}:${config.server.port}`);
 });

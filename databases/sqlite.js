@@ -1,9 +1,6 @@
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("drawings.db");
 
-// Used to reset the schema
-// db.run("DROP TABLE IF EXISTS drawings");
-
 db.serialize(() => {
   // Create the drawings table
   db.run(
