@@ -27,8 +27,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // login();
 
-
-
   //loads drawings for each canvas per session
   function renderDrawings() {
     fetch("/getDrawingData")
@@ -41,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
           const ctx = canvas.getContext("2d");
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-          function drawLine(x1, y1, x2, y2, color, width, emit) {
+          function drawLine(x1, y1, x2, y2, color, width) {
             ctx.beginPath();
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
@@ -49,10 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.lineWidth = width;
             ctx.lineCap = "round";
             ctx.stroke();
-        
-            if (emit) {
-              socket.emit("draw", { x1, y1, x2, y2, color, width });
-            }
           }
 
           const scaleFactor = Math.min(
@@ -101,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  //Deletes all drawings for a specific session ID
+  //Deletes all drawings for a specific session
   const deleteButtons = document.querySelectorAll(".delete-btn");
   deleteButtons.forEach((button) => {
     button.addEventListener("click", function () {

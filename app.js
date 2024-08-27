@@ -10,7 +10,7 @@ const { banCheckMiddleware } = require("./middleware/banCheckMiddleware");
 
 const WorkerPool = require("./worker_threads/workerPool");
 // You can change the amount of workers
-const workers = new WorkerPool(1, "./drawingWorker");
+const workers = new WorkerPool(3, "./drawingWorker");
 
 const app = express();
 const server = createServer(app);
@@ -79,8 +79,12 @@ io.on("connection", (socket) => {
       drawCount = 0;
     }, 60 * 1000);
 
-    db.insertDrawingData(sessionId, data);
-    socket.broadcast.emit("draw", data);
+    workers.runTask(
+      { type: "insertDrawingData", sessionId: sessionId, data: data },
+      (data) => {
+        socket.broadcast.emit("draw", data.data);
+      }
+    );
   });
 
   // clear drawings event
@@ -90,5 +94,7 @@ io.on("connection", (socket) => {
 });
 
 server.listen(config.server.port, config.server.domain, () => {
-  console.log(`Server running at ${config.server.domain}:${config.server.port}`);
+  console.log(
+    `Server running at ${config.server.domain}:${config.server.port}`
+  );
 });
