@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+  // Deletes all of the users drawings
   document.getElementById("trash-btn").addEventListener("click", function () {
     if (confirm("Are you sure you want to clear all your drawings?")) {
       socket.emit("trashDrawings");
@@ -54,11 +55,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  //Pencil Event Listener
   const pencilButton = document.getElementById("pencil-btn");
   pencilButton.addEventListener("click", function () {
     setActiveTool("pencil");
   });
 
+  //Eraser event listener
   const eraserButton = document.getElementById("eraser-btn");
   eraserButton.addEventListener("click", function () {
     setActiveTool("eraser");
@@ -187,35 +190,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function drawLine(x1, y1, x2, y2, color, width, emit) {
+  function drawLine(startX, startY, endX, endY, color, width, emit) {
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
     ctx.strokeStyle = color;
     ctx.lineWidth = width;
     ctx.lineCap = "round";
     ctx.stroke();
 
     if (emit) {
-      socket.emit("draw", { x1, y1, x2, y2, color, width });
+      socket.emit("draw", { startX, startY, endX, endY, color, width });
     }
   }
 
   // Incoming socket events
-  socket.on("loadDrawingData", (drawingData) => {
-    offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-    drawingData.forEach((data) => {
-      offscreenCtx.beginPath();
-      offscreenCtx.moveTo(data.x1, data.y1);
-      offscreenCtx.lineTo(data.x2, data.y2);
-      offscreenCtx.strokeStyle = data.color;
-      offscreenCtx.lineWidth = data.width;
-      offscreenCtx.lineCap = "round";
-      offscreenCtx.stroke();
+  fetch("/getDrawingData")
+    .then((response) => response.json())
+    .then((drawingData) => {
+      offscreenCtx.clearRect(
+        0,
+        0,
+        offscreenCanvas.width,
+        offscreenCanvas.height
+      );
+      drawingData.forEach((data) => {
+        offscreenCtx.beginPath();
+        offscreenCtx.moveTo(data.startX, data.startY);
+        offscreenCtx.lineTo(data.endX, data.endY);
+        offscreenCtx.strokeStyle = data.color;
+        offscreenCtx.lineWidth = data.width;
+        offscreenCtx.lineCap = "round";
+        offscreenCtx.stroke();
+      });
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(offscreenCanvas, 0, 0);
+    })
+    .catch((error) => {
+      console.error("Error fetching drawing data:", error);
     });
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(offscreenCanvas, 0, 0);
-  });
 
   socket.on("banUser", () => {
     alert("Your access has been revoked.");
@@ -229,6 +243,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // draws on the non-drawing client(s) screen(s)
   socket.on("draw", (data) => {
-    drawLine(data.x1, data.y1, data.x2, data.y2, data.color, data.width, false);
+    drawLine(
+      data.startX,
+      data.startY,
+      data.endX,
+      data.endY,
+      data.color,
+      data.width,
+      false
+    );
   });
+
+  // Obtain Username from server
+  fetch("/getUsername")
+    .then((response) => response.json())
+    .then((data) => {
+      document.getElementById("username").textContent = data.username;
+    })
+    .catch((error) => console.error("Error fetching username:", error));
 });

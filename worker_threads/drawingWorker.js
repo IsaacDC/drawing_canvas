@@ -1,8 +1,8 @@
 const { parentPort } = require("node:worker_threads");
-const db = require("../databases/dbChooser");
+const db = require("../databases/dbSwitcher");
 parentPort.on("message", (message) => {
   if (message.type === "loadDrawingData") {
-    db.getAllDrawingData((drawingData) => {
+    db.getAllDrawingData((err, drawingData) => {
       parentPort.postMessage({ type: "drawingData", data: drawingData });
     });
   }

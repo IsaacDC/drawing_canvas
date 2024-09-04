@@ -1,9 +1,20 @@
+@font-face {
+  font-family: "New-Frank";
+  src: url("New-Frank.otf");
+}
 body {
-  font-family: Arial, sans-serif !important;
+  font-family: "New-Frank" !important;
   margin: 0;
   padding: 0;
   background-color: #081e3f;
-  overflow-x: auto;
+}
+
+#username-container {
+  display: flex;
+  gap: 0.2em;
+  font-size: 1.2em;
+  color: white;
+  margin: 20px;
 }
 
 button {
@@ -17,7 +28,7 @@ button {
   padding: 10px 20px;
 }
 
-.tools button{
+.tools button {
   background-color: #b6862c;
 }
 
