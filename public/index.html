@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="reset.css" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./styles/reset.css" />
+    <link rel="stylesheet" href="./styles/style.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -13,6 +13,10 @@
   </head>
 
   <body>
+    <div id="username-container">
+      <h1>Username:</h1>
+      <p id="username"></p>
+    </div>
     <canvas id="canvas"></canvas>
     <canvas id="offscreenCanvas"></canvas>
 
@@ -31,7 +35,7 @@
           min="1"
           max="100"
           value="5"
-          id="stroke-width"
+          id="stroke-width-slider"
         />
         <input
           title="slider-value"
@@ -46,13 +50,19 @@
         <button id="trash-btn" title="clear-button">
           <i class="fas fa-trash-alt"></i>
         </button>
+        <button id="pencil-btn" title="pencil-button">
+          <i class="fas fa-pencil-alt"></i>
+        </button>
+        <button id="eraser-btn" title="eraser-button">
+          <i class="fas fa-eraser"></i>
+        </button>
         <button id="download-btn" title="download-button">
           <i class="fas fa-download"></i>
         </button>
       </div>
     </div>
-
+    
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script type="module" src="client.js"></script>
+    <script src="client.js"></script>
   </body>
 </html>

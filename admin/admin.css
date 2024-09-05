@@ -5,16 +5,8 @@ button:hover {
   background-color: #c72727;
 }
 
-.tools button{
-  background-color: #b6862c;
-}
-
-.tools button:hover {
-  background-color: #a57328;
-}
-
 #clear-canvas {
-  margin: 20px 10px 0 10px;
+  margin: 20px 10px 0px 20px;
 }
 
 #data-tables {

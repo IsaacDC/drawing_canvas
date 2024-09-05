@@ -1,3 +1,4 @@
+"use strict";
 document.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect();
   const canvas = document.getElementById("canvas");
@@ -11,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastY = 0;
   let color = "#000000";
   let strokeWidth = 5;
+  let pencilColor = color;
+  let currentTool = "pencil";
 
   const canvasWidth = 1920;
   const canvasHeight = 1080;
@@ -34,11 +37,34 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("touchend", stopDrawing);
   canvas.addEventListener("touchcancel", stopDrawing);
 
+  // Update stroke color
+  document
+    .getElementById("stroke-color")
+    .addEventListener("input", function () {
+      if (currentTool === "pencil") {
+        color = this.value;
+        pencilColor = color;
+      }
+    });
+
+  // Deletes all of the users drawings
   document.getElementById("trash-btn").addEventListener("click", function () {
     if (confirm("Are you sure you want to clear all your drawings?")) {
-      location.reload();
       socket.emit("trashDrawings");
+      location.reload();
     }
+  });
+
+  //Pencil Event Listener
+  const pencilButton = document.getElementById("pencil-btn");
+  pencilButton.addEventListener("click", function () {
+    setActiveTool("pencil");
+  });
+
+  //Eraser event listener
+  const eraserButton = document.getElementById("eraser-btn");
+  eraserButton.addEventListener("click", function () {
+    setActiveTool("eraser");
   });
 
   // Save image button
@@ -67,27 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
       link.click();
     });
 
-  // Update stroke color
+  // Update stroke width based on slider value
   document
-    .getElementById("stroke-color")
-    .addEventListener("input", function () {
-      color = this.value;
-    });
-
-  // Update stroke width
-  function updateValues(value) {
-    strokeWidth = value;
-    document.getElementById("stroke-width").value = value;
-    document.getElementById("slider-value").value = value;
-    ctx.lineWidth = value;
-  }
-
-  document
-    .getElementById("stroke-width")
+    .getElementById("stroke-width-slider")
     .addEventListener("input", function () {
       updateValues(this.value);
     });
 
+  // Update stroke width based on input value
   document
     .getElementById("slider-value")
     .addEventListener("input", function () {
@@ -112,6 +125,34 @@ document.addEventListener("DOMContentLoaded", () => {
         y: (touch.clientY - rect.top) * scaleY,
       };
     }
+  }
+
+  // sets active tool with color and "active" class
+  function setActiveTool(tool) {
+    switch (tool) {
+      case "pencil":
+        pencilButton.classList.add("active");
+        eraserButton.classList.remove("active");
+        color = pencilColor;
+        break;
+      case "eraser":
+        eraserButton.classList.add("active");
+        pencilButton.classList.remove("active");
+        color = "white";
+        break;
+    }
+    currentTool = tool;
+  }
+
+  // Sets default active tool as pencil
+  setActiveTool("pencil");
+
+  // Update stroke width
+  function updateValues(value) {
+    strokeWidth = value;
+    document.getElementById("stroke-width-slider").value = value;
+    document.getElementById("slider-value").value = value;
+    ctx.lineWidth = value;
   }
 
   function startDrawing(e) {
@@ -149,35 +190,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function drawLine(x1, y1, x2, y2, color, width, emit) {
+  function drawLine(startX, startY, endX, endY, color, width, emit) {
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
     ctx.strokeStyle = color;
     ctx.lineWidth = width;
     ctx.lineCap = "round";
     ctx.stroke();
 
     if (emit) {
-      socket.emit("draw", { x1, y1, x2, y2, color, width });
+      socket.emit("draw", { startX, startY, endX, endY, color, width });
     }
   }
 
   // Incoming socket events
-  socket.on("loadDrawingData", (drawingData) => {
-    offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-    drawingData.forEach((data) => {
-      offscreenCtx.beginPath();
-      offscreenCtx.moveTo(data.x1, data.y1);
-      offscreenCtx.lineTo(data.x2, data.y2);
-      offscreenCtx.strokeStyle = data.color;
-      offscreenCtx.lineWidth = data.width;
-      offscreenCtx.lineCap = "round";
-      offscreenCtx.stroke();
+  fetch("/getDrawingData")
+    .then((response) => response.json())
+    .then((drawingData) => {
+      offscreenCtx.clearRect(
+        0,
+        0,
+        offscreenCanvas.width,
+        offscreenCanvas.height
+      );
+      drawingData.forEach((data) => {
+        offscreenCtx.beginPath();
+        offscreenCtx.moveTo(data.startX, data.startY);
+        offscreenCtx.lineTo(data.endX, data.endY);
+        offscreenCtx.strokeStyle = data.color;
+        offscreenCtx.lineWidth = data.width;
+        offscreenCtx.lineCap = "round";
+        offscreenCtx.stroke();
+      });
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(offscreenCanvas, 0, 0);
+    })
+    .catch((error) => {
+      console.error("Error fetching drawing data:", error);
     });
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(offscreenCanvas, 0, 0);
-  });
 
   socket.on("banUser", () => {
     alert("Your access has been revoked.");
@@ -191,6 +243,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // draws on the non-drawing client(s) screen(s)
   socket.on("draw", (data) => {
-    drawLine(data.x1, data.y1, data.x2, data.y2, data.color, data.width, false);
+    drawLine(
+      data.startX,
+      data.startY,
+      data.endX,
+      data.endY,
+      data.color,
+      data.width,
+      false
+    );
   });
+
+  // Obtain Username from server
+  fetch("/getUsername")
+    .then((response) => response.json())
+    .then((data) => {
+      document.getElementById("username").textContent = data.username;
+    })
+    .catch((error) => console.error("Error fetching username:", error));
 });

@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./reset.css" />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./styles/reset.css" />
+    <link rel="stylesheet" href="./styles/style.css" />
     <link rel="stylesheet" href="admin.css" />
     <link
       rel="stylesheet"
@@ -14,8 +14,14 @@
   </head>
 
   <body>
+    <div id="username-container">
+      <h1>Username:</h1>
+      <p id="username"></p>
+    </div>
+
     <canvas id="canvas"></canvas>
     <canvas id="offscreenCanvas"></canvas>
+
     <div class="tools-container">
       <div class="tools">
         <input
@@ -31,7 +37,7 @@
           min="1"
           max="100"
           value="5"
-          id="stroke-width"
+          id="stroke-width-slider"
         />
         <input
           title="slider-value"
@@ -45,6 +51,12 @@
       <div class="tools">
         <button id="trash-btn" title="clear-button">
           <i class="fas fa-trash-alt"></i>
+        </button>
+        <button id="pencil-btn" title="pencil-button">
+          <i class="fas fa-pencil-alt"></i>
+        </button>
+        <button id="eraser-btn" title="eraser-button">
+          <i class="fas fa-eraser"></i>
         </button>
         <button id="download-btn" title="download-button">
           <i class="fas fa-download"></i>
@@ -60,8 +72,8 @@
       <table id="drawings-data-table">
         <thead>
           <tr>
-            <th>SessionID</th>
-            <th>Session's Drawings</th>
+            <th>SessionId</th>
+            <th>User's Drawings</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -70,61 +82,73 @@
           <tr>
             <td colspan="3">No data available</td>
           </tr>
-          <% } else { %> <% const sessionIDs=new Set(); %>
-          <%drawingData.forEach(entry=> sessionIDs.add(entry.sessionID)); %>
-          <%sessionIDs.forEach(sessionID=> { %>
+          <% } else { %> 
+            <% const sessionIds=new Set(); %>
+            <% drawingData.forEach(entry=> sessionIds.add(entry.sessionId)); %>
+            <% sessionIds.forEach(sessionId=> { %>
           <tr>
-            <td><strong>SessionID: <%= sessionID %></strong></td>
+            <td><strong>SessionId: <%= sessionId %></strong></td>
             <td>
               <canvas
                 class="session-canvas"
-                data-session-id="<%= sessionID %>"
+                data-session-id="<%= sessionId %>"
               ></canvas>
             </td>
             <td>
-              <button class="delete-btn" data-session-id="<%= sessionID %>">
+              <button class="delete-btn" data-session-id="<%= sessionId %>">
                 Delete
               </button>
-              <button class="ban-btn" data-session-id="<%= sessionID %>">
+              <button class="ban-btn" data-session-id="<%= sessionId %>">
                 Ban
               </button>
             </td>
           </tr>
-          <% }); %> <% } %>
+            <% }); %> 
+          <% } %>
         </tbody>
       </table>
-      <table id="banned-sessions-table">
+      <table id="banned-users-table">
         <thead>
           <tr>
-            <th>Banned SessionIDs</th>
+            <th>Banned users</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <% if (bannedSessions.length === 0) { %>
+          <% if (bannedUsers.length === 0) { %>
           <tr>
-            <td colspan="2">No banned sessions</td>
+            <td colspan="2">No banned users</td>
           </tr>
-          <% } else { %> <% const sessionIDs = []; %> <%
-          bannedSessions.forEach(entry => sessionIDs.push(entry.sessionID)); %>
-          <%sessionIDs.forEach(sessionID=> { %>
+          <% } else { %> 
+            <% const users = {}; %> 
+            <% bannedUsers.forEach(entry => users[entry.sessionId] = entry.username); %>
+            <% Object.keys(users).forEach(sessionId=> { %>
           <tr>
             <td>
-              <strong>SessionID: <%= sessionID %></strong>
+              <strong>sessionId: <%= sessionId %></strong>
+              <br>
+              <br>
+              <strong>Username: <%= users[sessionId] %></strong>
             </td>
+
             <td>
-              <button class="unban-btn" data-session-id="<%= sessionID %>">
+              <button class="unban-btn" data-session-id="<%= sessionId %>">
                 Unban
               </button>
             </td>
           </tr>
-          <% }); %> <% } %>
+            <% }); %> 
+          <% } %>
         </tbody>
       </table>
     </section>
 
-    <script type="module" src="admin.js"></script>
-    <script type="module" src="./client.js"></script>
+    <script>
+      const drawingData = <%- JSON.stringify(drawingData) %>;
+      const bannedUsers = <%- JSON.stringify(bannedUsers) %>;
+    </script>    
+    <script src="admin.js"></script>
+    <script src="./client.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   </body>
 </html>

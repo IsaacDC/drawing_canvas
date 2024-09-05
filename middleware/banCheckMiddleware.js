@@ -1,11 +1,11 @@
 // Ban Check Middleware
-const db = require("../databases/dbChooser");
+const db = require("../databases/dbSwitcher");
 
 const banCheckMiddleware = (req, res, next) => {
   if (req.session) {
-    db.isSessionBanned(req.sessionID, (err, isBanned) => {
+    db.isUserBanned(req.session.id, (err, isBanned) => {
       if (err) {
-        console.error("Error checking if sessionID is banned:", err);
+        console.error("Error checking if sessionId is banned:", err);
         res.status(500).send("Server error");
       } else if (isBanned) {
         res.status(403).send("Access denied");

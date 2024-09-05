@@ -1,9 +1,11 @@
-const URL = `http://localhost:`;
-const NODE_ENV = 'development';
+const DOMAIN = `127.0.0.1`;
+const PORT = 3000;
+const NODE_ENV = 'production';
 
 module.exports = {
-  URL: URL,
+  domain: DOMAIN,
   NODE_ENV: NODE_ENV,
+  PORT: PORT,
 
   redisConfig: {
     host: "127.0.0.1",
@@ -16,11 +18,11 @@ module.exports = {
     database: "drawings_app",
   },
   server: {
-    port: 3000,
-    URL: URL,
+    port: PORT,
+    domain: DOMAIN,
   },
   cors: {
-    origin: `${URL}3000`,
+    origin: `http://${DOMAIN}:${PORT}`,
     credentials: true,
   },
 };

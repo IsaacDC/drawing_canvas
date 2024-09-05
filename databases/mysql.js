@@ -5,21 +5,20 @@ const pool = mysql.createPool(config.database);
 
 module.exports = {
   //insert drawing data
-  insertDrawingData(sessionID, data) {
-    const { x1, y1, x2, y2, color, width } = data;
+  insertDrawingData(sessionId, data) {
+    const { startX, startY, endX, endY, color, width } = data;
 
     let sql, params;
 
     if (color) {
       sql =
-        "INSERT INTO drawings (sessionID,type, x1, y1, x2, y2, color, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-      params = [sessionID, "draw", x1, y1, x2, y2, color, width];
+        "INSERT INTO drawings (sessionId, startX, startY, endX, endY, color, width) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      params = [sessionId, startX, startY, endX, endY, color, width];
     } else {
       sql =
-        "INSERT INTO drawings (sessionID,type, x1, y1, x2, y2, width) VALUES (?, ?, ?, ?, ?, ?, ?)";
-      params = [sessionID, "draw", x1, y1, x2, y2, width];
+        "INSERT INTO drawings (sessionId, startX, startY, endX, endY, width) VALUES (?, ?, ?, ?, ?, ?)";
+      params = [sessionId, startX, startY, endX, endY, width];
     }
-
     pool.query(sql, params, (err) => {
       if (err) {
         console.error("Error inserting drawing data:", err);
@@ -29,23 +28,23 @@ module.exports = {
 
   //gets all drawing data
   getAllDrawingData(callback) {
-    pool.query("SELECT * FROM drawings ORDER BY timestamp ASC", (err, rows) => {
+    pool.query("SELECT * FROM drawings", (err, results) => {
       if (err) {
         console.error("Error getting all drawing data:" + err);
         return;
       }
-      callback(rows);
+      callback(null, results);
     });
   },
 
-  //deletes all drawings for a specific session ID
-  deleteDrawingsBySessionID(sessionId) {
+  // Delete all drawings for a specific session ID
+  deleteDrawingsByUser(sessionId) {
     pool.query(
-      "DELETE FROM drawings WHERE sessionID = ?",
+      "DELETE FROM drawings WHERE sessionId = ?",
       [sessionId],
       (err) => {
         if (err) {
-          console.error("Error deleting drawings by session ID:", err);
+          console.error("Error deleting drawings by sessionId:", err);
         }
       }
     );
@@ -63,54 +62,95 @@ module.exports = {
     });
   },
 
-  // Add a new banned sessionID
-  banSessionID(sessionID, callback) {
+  addUser(sessionId, username, callback) {
     pool.query(
-      "INSERT INTO bannedSessionIDs (sessionID) VALUES (?)",
-      [sessionID],
-      (err) => {
+      "SELECT 1 FROM users WHERE sessionId = ? LIMIT 1",
+      [sessionId],
+      (err, results) => {
+        if (err) {
+          console.log("Error checking if user already exists:", err);
+          callback(err, null);
+        } else if (results.length > 0) {
+          callback(null, results[0]);
+        } else {
+          pool.query(
+            "INSERT INTO users (sessionId, username) VALUES (?,?)",
+            [sessionId, username],
+            function (err) {
+              if (err) {
+                console.error("Error inserting user data:", err);
+                callback(err, null);
+              } else {
+                callback(null, { sessionId, username });
+              }
+            }
+          );
+        }
+      }
+    );
+  },
+
+  // ban a User
+  banUser(sessionId, callback) {
+    pool.query(
+      "UPDATE users set is_banned = 1 WHERE sessionId = ?",
+      [sessionId],
+      (err, result) => {
         if (err) {
           callback(err);
         } else {
-          callback(null);
+          callback(null, result.affectedRows > 0);
         }
       }
     );
   },
 
   // Check if a sessionID is banned
-  isSessionBanned(sessionID, callback) {
+  isUserBanned(sessionId, callback) {
     pool.query(
-      "SELECT * FROM bannedSessionIDs WHERE sessionID = ?",
-      [sessionID],
-      (err, result) => {
+      "SELECT is_banned FROM users WHERE sessionId = ?",
+      [sessionId],
+      (err, results) => {
         if (err) {
           callback(err);
+        } else if (results.length === 0) {
+          // User not found
+          callback(null, false);
         } else {
-          callback(null, result.length > 0);
+          // Check if the user is banned
+          callback(null, results[0].is_banned === 1);
         }
       }
     );
   },
 
-  getBannedSessions(callback) {
-    pool.query("SELECT * FROM bannedSessionIDs", (err, rows) => {
-      if (err) {
-        console.error("Error getting banned sessions:", err);
-        return;
+  getBannedUsers(callback) {
+    pool.query(
+      "SELECT * FROM users WHERE is_banned = 1",
+      [],
+      (err, results) => {
+        if (err) {
+          console.error("Error getting banned users:", err);
+          callback(err, null);
+          return;
+        }
+        callback(null, results);
       }
-      callback(rows);
-    });
+    );
   },
 
-  // Remove a banned sessionID
-  unbanSessionId(sessionID, callback) {
+  // Remove a banned sessionId
+  unbanUser(sessionId, callback) {
     pool.query(
-      "DELETE FROM bannedSessionIDs WHERE sessionID = ?",
-      [sessionID],
-      (err) => {
+      "UPDATE users set is_banned = 0 WHERE sessionId = ?",
+      [sessionId],
+      (err, result) => {
         if (err) {
+          console.error("Error unbanning user:", err);
           callback(err);
+        } else if (result.affectedRows === 0) {
+          // SessionId wasn't found
+          callback(new Error("User not found"));
         } else {
           callback(null);
         }

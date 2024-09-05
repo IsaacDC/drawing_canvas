@@ -27,56 +27,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // login();
 
-
-
   //loads drawings for each canvas per session
   function renderDrawings() {
-    fetch("/getDrawingData")
-      .then((response) => response.json())
-      .then((drawingData) => {
-        const sessionCanvases = document.querySelectorAll(".session-canvas");
+    const sessionCanvases = document.querySelectorAll(".session-canvas");
 
-        sessionCanvases.forEach((canvas) => {
-          const sessionId = canvas.getAttribute("data-session-id");
-          const ctx = canvas.getContext("2d");
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+    sessionCanvases.forEach((canvas) => {
+      const sessionId = canvas.getAttribute("data-session-id");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-          function drawLine(x1, y1, x2, y2, color, width, emit) {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width;
-            ctx.lineCap = "round";
-            ctx.stroke();
-        
-            if (emit) {
-              socket.emit("draw", { x1, y1, x2, y2, color, width });
-            }
-          }
+      function drawLine(startX, startY, endX, endY, color, width) {
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.stroke();
+      }
 
-          const scaleFactor = Math.min(
-            canvas.width / 1920,
-            canvas.height / 1080
-          );
-          ctx.scale(scaleFactor, scaleFactor);
+      const scaleFactor = Math.min(canvas.width / 1920, canvas.height / 1080);
+      ctx.scale(scaleFactor, scaleFactor);
 
-          const filteredData = drawingData.filter(
-            (data) => data.sessionID === sessionId
-          );
-          filteredData.forEach((data) => {
-            drawLine(
-              data.x1,
-              data.y1,
-              data.x2,
-              data.y2,
-              data.color,
-              data.width,
-              false
-            );
-          });
-        });
+      const filteredData = drawingData.filter(
+        (data) => data.sessionId === sessionId
+      );
+      filteredData.forEach((data) => {
+        drawLine(
+          data.startX,
+          data.startY,
+          data.endX,
+          data.endY,
+          data.color,
+          data.width,
+          false
+        );
       });
+    });
   }
   renderDrawings();
 
@@ -101,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  //Deletes all drawings for a specific session ID
+  //Deletes all drawings for a specific session
   const deleteButtons = document.querySelectorAll(".delete-btn");
   deleteButtons.forEach((button) => {
     button.addEventListener("click", function () {
@@ -142,23 +129,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.success) {
               alert("Session ID banned successfully");
               location.reload();
-              fetch(`/delete/${sessionId}`, {
-                method: "DELETE",
-              })
-                .then((response) => response.json())
-                .then((data) => {
-                  if (!data.success) {
-                    alert("Error deleting drawings");
-                  }
-                })
-                .catch((error) => {
-                  console.error("Error:", error);
-                });
             } else {
-              alert("Error banning session ID");
+              throw new Error("Error deleting drawings");
             }
           })
           .catch((error) => {
+            alert(error.message);
             console.error("Error:", error);
           });
       }

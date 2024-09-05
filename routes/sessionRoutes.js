@@ -1,11 +1,11 @@
 const express = require("express");
-const db = require("../databases/dbChooser");
+const db = require("../databases/dbSwitcher");
 const router = express.Router();
 
 // Delete session route
 router.delete("/delete/:sessionId", (req, res) => {
   const sessionId = req.params.sessionId;
-  db.deleteDrawingsBySessionID(sessionId, (result) => {
+  db.deleteDrawingsByUser(sessionId, (result) => {
     res.json({ success: result });
   });
 });
@@ -13,9 +13,9 @@ router.delete("/delete/:sessionId", (req, res) => {
 // Ban session route
 router.post("/ban/:sessionId", (req, res) => {
   const sessionId = req.params.sessionId;
-  db.banSessionID(sessionId, (err) => {
+  db.banUser(sessionId, (err) => {
     if (err) {
-      console.error("Error banning sessionID:", err);
+      console.error("Error banning sessionId:", err);
       res.status(500).json({ success: false, message: "Server error" });
     } else {
       // Emit event to connected clients
@@ -28,18 +28,17 @@ router.post("/ban/:sessionId", (req, res) => {
       res.json({ success: true });
     }
   });
-});
-
-router.delete("/delete/:sessionId", (req, res) => {
-  const sessionId = req.params.sessionId;
-  db.deleteDrawingsBySessionID(sessionId, (result) => {
-    res.json({ success: result });
+  db.deleteDrawingsByUser(sessionId, (err) => {
+    if (err) {
+      console.error("Error deleting drawings by sessionId:", err);
+    }
   });
 });
 
+// unban user
 router.delete("/unban/:sessionId", (req, res) => {
   const sessionId = req.params.sessionId;
-  db.unbanSessionId(sessionId, (err) => {
+  db.unbanUser(sessionId, (err) => {
     if (err) {
       console.error("Error unbanning sessionID:", err);
       res.status(500).json({ success: false, message: "Server error" });
@@ -49,13 +48,17 @@ router.delete("/unban/:sessionId", (req, res) => {
   });
 });
 
-router.get("/getBannedSessions", (req, res) => {
-  db.getBannedSessions((rows) => {
-    res.json({
-      success: true,
-      bannedSessions: rows.map((row) => row.sessionID),
-    });
+// Delete users drawing
+router.delete("/delete/:sessionId", (req, res) => {
+  const sessionId = req.params.sessionId;
+  db.deleteDrawingsByUser(sessionId, (result) => {
+    res.json({ success: result });
   });
+});
+
+//
+router.get("/getUsername", (req, res) => {
+  res.json({ username: req.session.username });
 });
 
 module.exports = router;
