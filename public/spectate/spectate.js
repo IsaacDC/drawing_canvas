@@ -31,20 +31,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  socket.on("loadDrawingData", (drawingData) => {
-    offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-    drawingData.forEach((data) => {
-      offscreenCtx.beginPath();
-      offscreenCtx.moveTo(data.startX, data.startY);
-      offscreenCtx.lineTo(data.endX, data.endY);
-      offscreenCtx.strokeStyle = data.color;
-      offscreenCtx.lineWidth = data.width;
-      offscreenCtx.lineCap = "round";
-      offscreenCtx.stroke();
+  fetch("/getDrawingData")
+    .then((response) => response.json())
+    .then((drawingData) => {
+      offscreenCtx.clearRect(
+        0,
+        0,
+        offscreenCanvas.width,
+        offscreenCanvas.height
+      );
+      drawingData.forEach((data) => {
+        offscreenCtx.beginPath();
+        offscreenCtx.moveTo(data.startX, data.startY);
+        offscreenCtx.lineTo(data.endX, data.endY);
+        offscreenCtx.strokeStyle = data.color;
+        offscreenCtx.lineWidth = data.width;
+        offscreenCtx.lineCap = "round";
+        offscreenCtx.stroke();
+      });
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(offscreenCanvas, 0, 0);
+    })
+    .catch((error) => {
+      console.error("Error fetching drawing data:", error);
     });
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(offscreenCanvas, 0, 0);
-  });
 
   socket.on("draw", (data) => {
     drawLine(

@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("touchend", stopDrawing);
   canvas.addEventListener("touchcancel", stopDrawing);
 
+  loadDrawings();
+
   // Update stroke color
   document
     .getElementById("stroke-color")
@@ -49,9 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Deletes all of the users drawings
   document.getElementById("trash-btn").addEventListener("click", function () {
-    if (confirm("Are you sure you want to clear all your drawings?")) {
+    if (confirm("Are you sure you want to clear all of your drawings?")) {
       socket.emit("trashDrawings");
-      location.reload();
     }
   });
 
@@ -204,41 +205,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Incoming socket events
-  fetch("/getDrawingData")
-    .then((response) => response.json())
-    .then((drawingData) => {
-      offscreenCtx.clearRect(
-        0,
-        0,
-        offscreenCanvas.width,
-        offscreenCanvas.height
-      );
-      drawingData.forEach((data) => {
-        offscreenCtx.beginPath();
-        offscreenCtx.moveTo(data.startX, data.startY);
-        offscreenCtx.lineTo(data.endX, data.endY);
-        offscreenCtx.strokeStyle = data.color;
-        offscreenCtx.lineWidth = data.width;
-        offscreenCtx.lineCap = "round";
-        offscreenCtx.stroke();
+  function loadDrawings() {
+    fetch("/getDrawingData")
+      .then((response) => response.json())
+      .then((drawingData) => {
+        offscreenCtx.clearRect(
+          0,
+          0,
+          offscreenCanvas.width,
+          offscreenCanvas.height
+        );
+        drawingData.forEach((data) => {
+          offscreenCtx.beginPath();
+          offscreenCtx.moveTo(data.startX, data.startY);
+          offscreenCtx.lineTo(data.endX, data.endY);
+          offscreenCtx.strokeStyle = data.color;
+          offscreenCtx.lineWidth = data.width;
+          offscreenCtx.lineCap = "round";
+          offscreenCtx.stroke();
+        });
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(offscreenCanvas, 0, 0);
+      })
+      .catch((error) => {
+        console.error("Error fetching drawing data:", error);
       });
+  }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(offscreenCanvas, 0, 0);
-    })
-    .catch((error) => {
-      console.error("Error fetching drawing data:", error);
-    });
-
+  // Incoming socket events
   socket.on("banUser", () => {
-    alert("Your access has been revoked.");
     socket.disconnect();
+    alert("Your access has been revoked.");
   });
 
   socket.on("drawingLimitReached", () => {
     alert("Drawing limit reached. Please try again later.");
     isDrawing = false;
+  });
+
+  socket.on("updateCanvas", () => {
+    loadDrawings();
   });
 
   // draws on the non-drawing client(s) screen(s)
