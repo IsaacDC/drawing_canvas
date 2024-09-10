@@ -61,10 +61,6 @@ io.on("connection", (socket) => {
 
   const sessionId = socket.request.sessionID;
 
-  workers.runTask({ type: "loadDrawingData" }, (data) => {
-    socket.emit("loadDrawingData", data.data);
-  });
-
   // start drawing event
   socket.on("draw", (data) => {
     const now = Date.now();
@@ -94,7 +90,8 @@ io.on("connection", (socket) => {
 
   // clear drawings event
   socket.on("trashDrawings", () => {
-    db.deleteDrawingsByUser(sessionId);
+    db.deleteDrawingsByUser(sessionId)
+    setTimeout(() => io.emit("updateCanvas"), 100);
   });
 });
 

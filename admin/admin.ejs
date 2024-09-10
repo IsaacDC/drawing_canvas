@@ -143,10 +143,10 @@
       </table>
     </section>
 
-    <script>
-      const drawingData = <%- JSON.stringify(drawingData) %>;
-      const bannedUsers = <%- JSON.stringify(bannedUsers) %>;
-    </script>    
+<script>
+  const drawingData = JSON.parse('<%- JSON.stringify(drawingData) %>');
+  const bannedUsers = JSON.parse('<%- JSON.stringify(bannedUsers) %>');
+</script>
     <script src="admin.js"></script>
     <script src="./client.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
