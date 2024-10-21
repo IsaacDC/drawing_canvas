@@ -23,58 +23,73 @@ This is a real-time drawing application built using Node.js, Express.js, and Soc
 ## Installation
 
 Navigate to the project directory:
+
 ```bash
   cd drawing_canvas
 ```
 
 Install the necessary packages:
+
 ```bash
     npm install
 ```
-    
+
 ### Docker Setup (MYSQL):
+
 - Ensure you have docker and docker-compose installed on your system.
 - Navigate to the 'docker' directory and run the following command to start the MYSQL Docker container:
+
 ```bash
-    docker-compose up -d
+    docker compose up -d
 ```
+
 This will create the necessary MySQL database container and set up the application.
 
 To start the docker if it's not running, run the following command:
+
 ```bash
   docker start CONTAINER_NAME
 ```
 
-
 ## Config Setup:
 
 Navigate to the config file in the server directory:
+
 ```bash
     cd server/config.js
 ```
+
 Here you're able to change the configuration settings to reflect the IPs of the services that are required:
 
 1. **DOMAIN**: Replace with the actual domain or IP address of your server.
 
-``` javascript
-    const DOMAIN = `your-server-domain-or-ip:`;
+```javascript
+const DOMAIN = `your-server-domain-or-ip:`;
 ```
+
 2. **PORT**: Replace with the actual port of server.
+
 ```javascript
-    const PORT = `your-port`
+const PORT = `your-port`;
 ```
-3. **NODE_ENV**: Change from `'development'` to `'production'`.
+
+3. **NODE_ENV**: Change from `'development'` to `'production'` ('development' utilizes SQLite and 'production' utilizes MySQL).
+
 ```javascript
-    const NODE_ENV = 'production';
+const NODE_ENV = "production";
 ```
+
 4. **Redis Config**: Update the Redis host to the server's Redis instance address if it's not running on the same server or if you're using a managed Redis service.
+
 ```javascript
     redisConfig: {
         host: "redis-server-domain-or-ip",
         port: 6379, // Keep the port the same if unchanged
     },
 ```
+
 5. **Database Config**: Update the host, user, password, and database settings to match the production database credentials and host.
+
 ```javascript
     database: {
         host: "database-server-domain-or-ip",
@@ -83,7 +98,9 @@ Here you're able to change the configuration settings to reflect the IPs of the 
         database: "some-database-name",
     },
 ```
+
 6. **CORS**: Ensure the 'origin' value is set to the correct serve domain and port.
+
 ```javascript
 cors: {
       origin: `http://${DOMAIN}:${PORT}`, // Replace with your production server's DOMAIN and port

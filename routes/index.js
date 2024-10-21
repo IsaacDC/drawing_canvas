@@ -3,6 +3,7 @@ const express = require("express");
 const adminRoutes = require("./adminRoutes");
 const sessionRoutes = require("./sessionRoutes");
 const dataRoutes = require("./dataRoutes");
+const spectateRoute = require("./spectateRoute");
 
 const router = express.Router();
 
@@ -10,5 +11,6 @@ const router = express.Router();
 router.use(adminRoutes);
 router.use(sessionRoutes);
 router.use(dataRoutes);
+router.use(spectateRoute);
 
 module.exports = router;

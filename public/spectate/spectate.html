@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../styles/reset.css" />
-    <link rel="stylesheet" href="./spectate.css" />
+    <link rel="stylesheet" href="../styles/base/reset.css" />
+    <link rel="stylesheet" href="spectate.css" />
     <title>Viewing</title>
   </head>
   <body>
     <canvas id="canvas"></canvas>
-    <canvas id="offscreenCanvas"></canvas>
+    <canvas class="hidden" id="offscreenCanvas"></canvas>
   </body>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script src="./spectate.js"></script>
+  <script src="spectate.js"></script>
 </html>

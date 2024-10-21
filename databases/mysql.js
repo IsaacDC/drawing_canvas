@@ -4,7 +4,6 @@ const config = require("../server/config");
 const pool = mysql.createPool(config.database);
 
 module.exports = {
-  //insert drawing data
   insertDrawingData(sessionId, data) {
     const { startX, startY, endX, endY, color, width } = data;
 
@@ -26,7 +25,6 @@ module.exports = {
     });
   },
 
-  //gets all drawing data
   getAllDrawingData(callback) {
     pool.query("SELECT * FROM drawings", (err, results) => {
       if (err) {
@@ -38,14 +36,16 @@ module.exports = {
   },
 
   // Delete all drawings for a specific session ID
-  deleteDrawingsByUser(sessionId) {
+  deleteDrawingsByUser(sessionId, callback) {
     pool.query(
       "DELETE FROM drawings WHERE sessionId = ?",
       [sessionId],
-      (err) => {
+      (err, results) => {
         if (err) {
           console.error("Error deleting drawings by sessionId:", err);
+          return callback(err, false);
         }
+        callback(null, results.affectedRows > 0);
       }
     );
   },
@@ -90,7 +90,17 @@ module.exports = {
     );
   },
 
-  // ban a User
+  getAllUsers(callback) {
+    pool.query("SELECT * FROM users", [], (err, results) => {
+      if (err) {
+        console.error("Error fetching users:", err);
+        callback(err, null);
+      } else {
+        callback(null, results);
+      }
+    });
+  },
+
   banUser(sessionId, callback) {
     pool.query(
       "UPDATE users set is_banned = 1 WHERE sessionId = ?",
@@ -105,7 +115,6 @@ module.exports = {
     );
   },
 
-  // Check if a sessionID is banned
   isUserBanned(sessionId, callback) {
     pool.query(
       "SELECT is_banned FROM users WHERE sessionId = ?",
@@ -139,7 +148,6 @@ module.exports = {
     );
   },
 
-  // Remove a banned sessionId
   unbanUser(sessionId, callback) {
     pool.query(
       "UPDATE users set is_banned = 0 WHERE sessionId = ?",
@@ -149,7 +157,6 @@ module.exports = {
           console.error("Error unbanning user:", err);
           callback(err);
         } else if (result.affectedRows === 0) {
-          // SessionId wasn't found
           callback(new Error("User not found"));
         } else {
           callback(null);

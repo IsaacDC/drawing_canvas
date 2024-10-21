@@ -3,23 +3,46 @@ const db = require("../databases/dbSwitcher");
 
 const router = express.Router();
 
-// Admin route
-router.get("/admin", (req, res) => {
-  db.getAllDrawingData((err, drawingData) => {
-    if (err) {
-      console.error("Error fetching drawing data:", err);
-      return res.status(500).send("Server error");
-    }
-
-    db.getBannedUsers((err, bannedUsers) => {
-      if (err) {
-        console.error("Error fetching banned users:", err);
-        return res.status(500).send("Server error");
-      }
-
-      res.render("admin", { drawingData, bannedUsers });
+const getAllDrawingData = () => {
+  return new Promise((resolve, reject) => {
+    db.getAllDrawingData((err, drawingData) => {
+      if (err) reject(err);
+      else resolve(drawingData);
     });
   });
+};
+
+const getAllUsers = () => {
+  return new Promise((resolve, reject) => {
+    db.getAllUsers((err, users) => {
+      if (err) reject(err);
+      else resolve(users);
+    });
+  });
+};
+
+const getBannedUsers = () => {
+  return new Promise((resolve, reject) => {
+    db.getBannedUsers((err, bannedUsers) => {
+      if (err) reject(err);
+      else resolve(bannedUsers);
+    });
+  });
+};
+
+// Admin route
+router.get("/admin", async (req, res) => {
+  try {
+    const [drawingData, userData, bannedUsers] = await Promise.all([
+      getAllDrawingData(),
+      getAllUsers(),
+      getBannedUsers(),
+    ]);
+    res.render("admin", { drawingData, userData, bannedUsers });
+  } catch (err) {
+    console.error("Error in admin route:", err);
+    res.status(500).json({ error: "Error fetching data" });
+  }
 });
 
 module.exports = router;
