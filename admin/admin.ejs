@@ -13,11 +13,11 @@
   </head>
 
   <body>
+    <div class="admin-header">ADMIN</div>
 
-      <iframe src="./index.html" style="width: 100%; height: 100vh"></iframe>
+    <iframe src="./index.html" style="width: 100%; height: 100vh"></iframe>
 
     <div class="wrapper">
-
       <button id="clear-canvas" class="admin-btn">
         <i class="fa fa-shield-halved" aria-hidden="true"></i> Clear Canvas
       </button>
@@ -35,13 +35,14 @@
             <tr>
               <td colspan="3">No data available</td>
             </tr>
-            <% } else { %> 
-              <!-- Creates a Set of sessionIds from drawingData -->
-              <% const uniqueSessionIds = [...new Set(drawingData.map(entry => entry.sessionId))];%> 
-              <!-- For every sessionId, it find the respective username from UserData -->
-              <% for (const sessionId of uniqueSessionIds) { %> 
-                <% const entry = userData.find(e => e.sessionId === sessionId); %> 
-           <!-- Displays each users sessionId, username, and their respective drawings -->
+            <% } else { %>
+            <!-- Creates a Set of sessionIds from drawingData -->
+            <% const uniqueSessionIds = [...new Set(drawingData.map(entry =>
+            entry.sessionId))];%>
+            <!-- For every sessionId, it find the respective username from UserData -->
+            <% for (const sessionId of uniqueSessionIds) { %> <% const entry =
+            userData.find(e => e.sessionId === sessionId); %>
+            <!-- Displays each users sessionId, username, and their respective drawings -->
             <tr>
               <td>
                 <strong>SessionId: <%= sessionId %></strong>

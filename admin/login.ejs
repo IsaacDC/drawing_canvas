@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles/main.css" />
+    <title>Login</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        background-color: var(--primary-color);
+      }
+      .login-container {
+        width: 300px;
+        padding: 20px;
+        background: #123456;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        text-align: center;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin: 5px;
+      }
+      input[type="text"],
+      input[type="password"] {
+        width: 92%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: var(--secondary-color);
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        color: var(--tertiary);
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: var(--button-hover-color);
+      }
+      .error-message {
+        color: red;
+        margin-bottom: 15px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Login</h1>
+      <% if (errorMessage) { %>
+      <p style="color: red"><%= errorMessage %></p>
+      <% } %>
+
+      <form action="/login" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" autocomplete="none" required />
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" autocomplete="none" required />
+
+        <button type="submit">Login</button>
+      </form>
+    </div>
+
+  </body>
+</html>

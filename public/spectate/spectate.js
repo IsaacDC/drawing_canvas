@@ -10,12 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvasWidth = 2560;
   const canvasHeight = 1440;
 
-
-
   // Set up canvas
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
-  
   offscreenCanvas.width = canvasWidth;
   offscreenCanvas.height = canvasHeight;
 

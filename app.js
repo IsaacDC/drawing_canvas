@@ -3,6 +3,7 @@ const { Server } = require("socket.io");
 const { createServer } = require("node:http");
 const { join } = require("node:path");
 
+const bodyParser = require('body-parser');
 const db = require("./databases/dbSwitcher");
 const config = require("./server/config");
 const middleware = require("./middleware/index");
@@ -24,6 +25,8 @@ app.use(middleware.usernameGenerator);
 app.use(middleware.banCheckMiddleware);
 app.use(express.static("public"));
 app.use(express.static("admin"));
+app.use(bodyParser.urlencoded({ extended: true }));
+
 
 const routes = require("./routes");
 app.use(routes);

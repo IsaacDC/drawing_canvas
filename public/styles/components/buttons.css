@@ -1,6 +1,6 @@
 button {
   border: none;
-  color: white;
+  color: var(--tertiary);
   text-align: center;
   display: inline-block;
   cursor: pointer;
