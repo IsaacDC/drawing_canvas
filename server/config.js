@@ -1,6 +1,6 @@
 const DOMAIN = `127.0.0.1`;
 const PORT = 3000;
-const NODE_ENV = 'development';
+const NODE_ENV = "development";
 
 module.exports = {
   domain: DOMAIN,

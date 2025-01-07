@@ -1,24 +1,16 @@
-#username-container {
-  display: flex;
-  gap: 0.2rem;
-  font-size: 1.5rem;
-  margin-bottom: 20px;
-}
-
 .canvas-container {
-  width: 720px;
+  width: 854px;
   height: 480px;
-}
-
-canvas {
-  width: 100%;
-  height: 100%;
-  background-color: white;
 }
 
 @media screen and (min-width: 768px) {
   .canvas-container {
     width: 1280px;
     height: 720px;
+  }
+  .main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 }

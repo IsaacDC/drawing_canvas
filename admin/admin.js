@@ -1,6 +1,16 @@
 document.addEventListener("DOMContentLoaded", function () {
   socket = io.connect();
 
+  // Styling
+  const iframe = document.querySelector("iframe");
+
+  iframe.onload = function () {
+    const iframeDocument =
+      iframe.contentDocument || iframe.contentWindow.document;
+    // Remove padding from iframe wrapper to avoid double margins
+    iframeDocument.querySelector(".wrapper").style.padding = 0;
+  };
+
   //loads drawings for each canvas per session
   const sessionCanvases = document.querySelectorAll(".session-canvas");
   sessionCanvases.forEach((canvas) => {
@@ -18,6 +28,48 @@ document.addEventListener("DOMContentLoaded", function () {
       ctx.lineCap = "round";
       ctx.stroke();
     }
+
+    // Carousel
+    const tables = [
+      {
+        id: "drawings-data-table",
+        header: "Drawing Data",
+      },
+      {
+        id: "banned-users-table",
+        header: "Banned Users",
+      },
+    ];
+
+    let currentIdx = 0;
+
+    const header = document.getElementById("table-header");
+    const prevButton = document.querySelector(".prev");
+    const nextButton = document.querySelector(".next");
+
+    const updateTable = () => {
+      tables.forEach((table, idx) => {
+        const tableElement = document.getElementById(table.id);
+        if (idx === currentIdx) {
+          tableElement.style.display = "";
+          header.textContent = table.header;
+        } else {
+          tableElement.style.display = "none";
+        }
+      });
+    };
+
+    prevButton.addEventListener("click", () => {
+      currentIdx = (currentIdx - 1 + tables.length) % tables.length;
+      updateTable();
+    });
+
+    nextButton.addEventListener("click", () => {
+      currentIdx = (currentIdx + 1) % tables.length;
+      updateTable();
+    });
+
+    updateTable();
 
     // scales the tables canvas down in respective to the main canvas
     const scaleFactor = Math.min(canvas.width / 2560, canvas.height / 1440);

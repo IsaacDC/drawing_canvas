@@ -1,5 +1,4 @@
 const express = require("express");
-const { join } = require("path");
 const db = require("../databases/dbSwitcher");
 
 const { adminAuthMiddleware } = require("../middleware");
@@ -61,7 +60,7 @@ router.get("/login", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
-  if (username === "mts" && password === "gl180") {
+  if (username === "mts" && password === "gl175") {
     req.session.admin = true;
     return res.redirect("/admin");
   } else {
