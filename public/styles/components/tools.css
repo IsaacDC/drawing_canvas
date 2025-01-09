@@ -2,7 +2,7 @@
   width: 35px;
   height: 35px;
   position: relative;
-  padding: 2px 3px;
+  padding: 2px 4px;
   background: content-box;
   box-sizing: border-box;
   border: none;
@@ -66,5 +66,5 @@ input[type="range"]:hover {
 #slider-value {
   border: none;
   width: 3rem;
-  font-size: 16px;
+  font-size: 1rem;
 }

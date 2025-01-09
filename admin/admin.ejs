@@ -23,155 +23,165 @@
   </head>
 
   <body>
-    <div class="wrapper">
-      <div class="content d-flex">
-        <!-- Canvas iframe -->
-        <section class="canvas-content w-100" style="height: 90vh">
-          <iframe src="./index.html" style="width: 100%; height: 100%"></iframe>
-        </section>
-        <!-- Admin Panel -->
-        <section class="w-100 d-flex flex-column" style="max-width: 32%">
-          <!-- Carousel -->
-          <div class="d-flex justify-content-evenly">
-            <button
-              class="fw-bold p-0 bg-transparent prev"
-              data-carousel-button="prev"
-            >
-              <i class="fa-solid fa-caret-left"></i>
-            </button>
+    <div class="d-flex p-3 gap-2">
+      <!-- Canvas iframe -->
+      <section class="w-100" style="height: 95vh">
+        <iframe class="w-100 h-100" src="./index.html"></iframe>
+      </section>
 
-            <h2 class="header" id="table-header">Drawing Data</h2>
-            <button
-              class="fw-bold p-0 bg-transparent next"
-              data-carousel-button="next"
-            >
-              <i class="fa-solid fa-caret-right"></i>
-            </button>
-          </div>
-
-          <!-- Data Tables -->
-          <div class="data-tables overflow-auto d-flex flex-column">
-            <table
-              class="table table-striped table-hover table-responsive text-center align-middle"
-              id="drawings-data-table"
-            >
-              <!--Table Head-->
-              <thead>
-                <tr>
-                  <th class="bg-info w-25 py-2 px-3 fw-bold text-uppercase">
-                    User
-                  </th>
-                  <th class="bg-info w-50 py-2 px-3 fw-bold text-uppercase">
-                    User's Drawings
-                  </th>
-                  <th class="bg-info w-25 py-2 px-3 fw-bold text-uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <!--Table Body-->
-              <tbody>
-                <% if (drawingData.length===0) { %>
-                <tr>
-                  <td colspan="3">No data available</td>
-                </tr>
-                <% } else { %>
-                <!-- Creates a Set of sessionIds from drawingData -->
-                <% const uniqueSessionIds = [...new Set(drawingData.map(entry =>
-                entry.sessionId))];%>
-                <!-- For every sessionId, it find the respective username from UserData -->
-                <% for (const sessionId of uniqueSessionIds) { %> <% const entry
-                = userData.find(e => e.sessionId === sessionId); %>
-                <!-- Displays each users sessionId, username, and their respective drawings -->
-                <tr class="border-bottom">
-                  <!--Users Cell-->
-                  <td class="align-middle text-center w-25">
-                    <strong>SessionId: <%= sessionId %></strong>
-                    <br />
-                    <br />
-                    <strong>Username: <%= entry.username %></strong>
-                  </td>
-                  <!--Drawings Cell-->
-                  <td class="align-middle text-center w-50">
-                    <div class="m-auto border border-dark w-100">
-                      <canvas
-                        class="session-canvas"
-                        data-session-id="<%= sessionId %>"
-                      ></canvas>
-                    </div>
-                  </td>
-                  <!--Actions Cell-->
-                  <td class="align-middle text-center w-25">
-                    <button
-                      id="delete-btn"
-                      class="btn btn-danger"
-                      data-session-id="<%= sessionId %>"
-                    >
-                      Delete
-                    </button>
-                    <br />
-                    <br />
-                    <button
-                      id="ban-btn"
-                      class="btn btn-danger"
-                      data-session-id="<%= sessionId %>"
-                    >
-                      Ban
-                    </button>
-                  </td>
-                </tr>
-                <% }; %> <% } %>
-              </tbody>
-            </table>
-
-            <table
-              class="table table-striped table-hover table-responsive text-center align-middle"
-              id="banned-users-table"
-            >
-              <thead>
-                <tr>
-                  <th class="bg-info w-25 py-2 px-3 fw-bold text-uppercase">
-                    Banned users
-                  </th>
-                  <th class="bg-info w-25 py-2 px-3 fw-bold text-uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <% if (bannedUsers.length === 0) { %>
-                <tr class="border-bottom">
-                  <td colspan="2">No banned users</td>
-                </tr>
-                <% } else { %> <% bannedUsers.forEach(user => { %>
-                <tr class="border-bottom">
-                  <td class="align-middle text-center w-50">
-                    <strong>SessionId: <%= user.sessionId %></strong>
-                    <br />
-                    <br />
-                    <strong>Username: <%= user.username %></strong>
-                  </td>
-
-                  <td class="align-middle text-center w-50">
-                    <button
-                      class="btn btn-danger"
-                      id="unban-btn"
-                      data-session-id="<%= user.sessionId %>"
-                    >
-                      Unban
-                    </button>
-                  </td>
-                </tr>
-                <% }); %> <% } %>
-              </tbody>
-            </table>
-          </div>
-          <!-- Clear Canvas Button -->
-          <button id="clear-canvas" class="admin-btn mt-auto btn btn-danger">
-            <i class="fa fa-shield-halved" aria-hidden="true"></i> Clear Canvas
+      <!-- Admin Panel -->
+      <section style="width: 45%; min-width: 20%">
+        <!-- Carousel -->
+        <div
+          class="fs-4 d-flex justify-content-evenly align-items-center mb-2"
+          style="height: 2rem"
+        >
+          <button class="p-0 bg-transparent prev" data-carousel-button="prev">
+            <i class="fa-solid fa-caret-left"></i>
           </button>
-        </section>
-      </div>
+
+          <h2 id="table-header">Drawing Data</h2>
+
+          <button class="p-0 bg-transparent next" data-carousel-button="next">
+            <i class="fa-solid fa-caret-right"></i>
+          </button>
+        </div>
+
+        <!-- Data Tables -->
+        <div class="data-tables overflow-auto">
+          <table
+            class="dataTables table table-striped table-hover table-responsive text-center align-middle"
+            id="drawings-data-table"
+          >
+            <!--Table Head-->
+            <thead class="position-sticky top-0">
+              <tr>
+                <th
+                  class="w-25 py-2 px-3 fw-bold text-uppercase"
+                  style="background-color: rgb(76, 117, 175)"
+                >
+                  User
+                </th>
+                <th
+                  class="w-50 py-2 px-3 fw-bold text-uppercase"
+                  style="background-color: rgb(76, 117, 175)"
+                >
+                  User's Drawings
+                </th>
+                <th
+                  class="w-25 py-2 px-3 fw-bold text-uppercase"
+                  style="background-color: rgb(76, 117, 175)"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <!--Table Body-->
+            <tbody>
+              <% if (drawingData.length===0) { %>
+              <tr>
+                <td colspan="3">No data available</td>
+              </tr>
+              <% } else { %>
+              <!-- Creates a Set of sessionIds from drawingData -->
+              <% const uniqueSessionIds = [...new Set(drawingData.map(entry =>
+              entry.sessionId))];%>
+              <!-- For every sessionId, it find the respective username from UserData -->
+              <% for (const sessionId of uniqueSessionIds) { %> <% const entry =
+              userData.find(e => e.sessionId === sessionId); %>
+              <!-- Displays each users sessionId, username, and their respective drawings -->
+              <tr class="border-bottom">
+                <!--Users Cell-->
+                <td class="align-middle text-center w-25">
+                  <strong>SessionId: <%= sessionId %></strong>
+                  <br />
+                  <br />
+                  <strong>Username: <%= entry.username %></strong>
+                </td>
+                <!--Drawings Cell-->
+                <td class="align-middle text-center w-50">
+                  <div class="m-auto border border-dark w-100">
+                    <canvas
+                      class="session-canvas"
+                      data-session-id="<%= sessionId %>"
+                    ></canvas>
+                  </div>
+                </td>
+                <!--Actions Cell-->
+                <td class="align-middle text-center w-25">
+                  <button
+                    id="delete-btn"
+                    class="btn btn-danger mb-2"
+                    data-session-id="<%= sessionId %>"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    id="ban-btn"
+                    class="btn btn-danger"
+                    data-session-id="<%= sessionId %>"
+                  >
+                    Ban
+                  </button>
+                </td>
+              </tr>
+              <% }; %> <% } %>
+            </tbody>
+          </table>
+
+          <table
+            class="table table-striped table-hover table-responsive text-center align-middle"
+            id="banned-users-table"
+          >
+            <thead>
+              <tr>
+                <th
+                  class="w-25 py-2 px-3 fw-bold text-uppercase"
+                  style="background-color: rgb(76, 117, 175)"
+                >
+                  Banned users
+                </th>
+                <th
+                  class="w-25 py-2 px-3 fw-bold text-uppercase"
+                  style="background-color: rgb(76, 117, 175)"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (bannedUsers.length === 0) { %>
+              <tr class="border-bottom">
+                <td colspan="2">No banned users</td>
+              </tr>
+              <% } else { %> <% bannedUsers.forEach(user => { %>
+              <tr class="border-bottom">
+                <td class="align-middle text-center w-50">
+                  <strong>SessionId: <%= user.sessionId %></strong>
+                  <br />
+                  <br />
+                  <strong>Username: <%= user.username %></strong>
+                </td>
+
+                <td class="align-middle text-center w-50">
+                  <button
+                    class="btn btn-danger"
+                    id="unban-btn"
+                    data-session-id="<%= user.sessionId %>"
+                  >
+                    Unban
+                  </button>
+                </td>
+              </tr>
+              <% }); %> <% } %>
+            </tbody>
+          </table>
+        </div>
+        <!-- Clear Canvas Button -->
+        <button id="clear-canvas" class="btn btn-danger w-100">
+          <i class="fa fa-shield-halved" aria-hidden="true"></i> Clear Canvas
+        </button>
+      </section>
     </div>
 
     <script>

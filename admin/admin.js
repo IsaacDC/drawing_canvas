@@ -8,7 +8,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const iframeDocument =
       iframe.contentDocument || iframe.contentWindow.document;
     // Remove padding from iframe wrapper to avoid double margins
-    iframeDocument.querySelector(".wrapper").style.padding = 0;
+    iframeDocument.querySelector("div").style.padding = 0;
+
+    const canvasHeight = iframeDocument.querySelector("#canvas").offsetHeight;
+    const dataTables = document.querySelector(".data-tables");
+    const clearCanvasBtn = document.querySelector("#clear-canvas").offsetHeight;
+
+    const totalHeight = canvasHeight - clearCanvasBtn;
+    dataTables.style.height = `${totalHeight}px`;
   };
 
   //loads drawings for each canvas per session
