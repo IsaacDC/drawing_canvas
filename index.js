@@ -2,23 +2,29 @@ const express = require("express");
 const { Server } = require("socket.io");
 const { createServer } = require("node:http");
 const { join } = require("node:path");
+require("dotenv").config();
 
-const bodyParser = require('body-parser');
-const db = require("./databases/dbSwitcher");
-const config = require("./server/config");
-const middleware = require("./middleware/index");
-const { sessionMiddleware, wrap } = require("./server/sessionStore");
-const WorkerPool = require("./worker_threads/workerPool");
+const serverHost = process.env.SERVER_HOST;
+const serverPort = process.env.SERVER_PORT;
+
+const bodyParser = require("body-parser");
+const db = require("./src/databases/dbSwitcher");
+const middleware = require("./src/middleware");
+const { sessionMiddleware, wrap } = require("./src/config/sessionStore");
+const WorkerPool = require("./src/services/workerPool");
 // You can change the amount of workers
-const workers = new WorkerPool(3, "./drawingWorker");
+const workers = new WorkerPool(3, "./src/services/drawingWorker");
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, config.cors);
+const io = new Server(server, {
+  origin: `http://${DOMAIN}:${PORT}`,
+  credentials: true,
+});
 
 app.set("io", io);
 app.set("view engine", "ejs");
-app.set("views", join(__dirname, "./admin"));
+app.set("views", join(__dirname, "./src/admin"));
 
 app.use(sessionMiddleware);
 app.use(middleware.usernameGenerator);
@@ -27,8 +33,7 @@ app.use(express.static("public"));
 app.use(express.static("admin"));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-const routes = require("./routes");
+const routes = require("./src/routes/index");
 app.use(routes);
 
 app.get("/", (req, res) => {
@@ -93,8 +98,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(config.server.port, config.server.domain, () => {
-  console.log(
-    `Server running at ${config.server.domain}:${config.server.port}`
-  );
+server.listen(serverPort, () => {
+  console.log(`Server running at ${serverHost}:${serverPort}`);
 });
