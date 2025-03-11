@@ -1,4 +1,4 @@
-
+.env
 drawings.db
 drawings.db-wal
 drawings.db-shm
