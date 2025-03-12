@@ -15,7 +15,7 @@ const usernameGenerator = async (req, res, next) => {
         dictionaries: [colors, animals],
         style: "capital",
       });
-      req.session.username = randomName;
+      session.username = randomName;
     }
 
     await new Promise((resolve, reject) => {

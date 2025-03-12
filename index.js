@@ -13,18 +13,18 @@ const middleware = require("./src/middleware");
 const { sessionMiddleware, wrap } = require("./src/config/sessionStore");
 const WorkerPool = require("./src/services/workerPool");
 // You can change the amount of workers
-const workers = new WorkerPool(3, "./src/services/drawingWorker");
+const workers = new WorkerPool(2, "./drawingWorker");
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-  origin: `http://${DOMAIN}:${PORT}`,
+  origin: `http://${serverHost}:${serverPort}`,
   credentials: true,
 });
 
 app.set("io", io);
 app.set("view engine", "ejs");
-app.set("views", join(__dirname, "./src/admin"));
+app.set("views", join(__dirname, "/admin"));
 
 app.use(sessionMiddleware);
 app.use(middleware.usernameGenerator);

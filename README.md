@@ -1,7 +1,6 @@
 # Collaborative Drawing Canvas Application
 
 This is a real-time drawing application built using Node.js, Express.js, and Socket.IO. The application allows users to collaborate on a shared canvas, with the ability to draw, change colors, and adjust stroke width.
-
 ## Features
 
 - Real-time Drawing: Users can collaborate on a shared canvas, with their drawings being displayed in real-time to all connected clients.
@@ -12,32 +11,85 @@ This is a real-time drawing application built using Node.js, Express.js, and Soc
 
 ## Tech Stack
 
-**Client:** HTML, CSS, JAvaScript, Canvas API
+**Client:** HTML, CSS, JavaScript
 
 **Server:** Node.js, Express.js, Socket.io
 
 **Database** SQLite for local development and MySQL for production. The MySQL database is set up using Docker.
 
 **Session Management** Redis
+## Getting Started
 
-## Installation
+### Prerequisites
 
-Navigate to the project directory:
+- Node.js: Required for running the application
+- Redis: Required for session management
+- Docker and Docker Compose: Optional, only needed if you want to use MySQL in a container instead of SQLite
 
+
+### Download Links:
+- [Docker Desktop for windows](https://docs.docker.com/desktop/setup/install/windows-install/)
+
+- [Docker Engine for Linux](https://docs.docker.com/desktop/setup/install/linux/)
+
+- [Redis for windows](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-windows/)
+
+- [Redis for Linux](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-linux/)
+
+### Installation
+
+1. Clone the repo
 ```bash
-  cd drawing_canvas
+git clone https://github.com/IsaacDC/drawing_canvas.git
+```
+2. Navigate to the project directory:
+```bash
+cd drawing_canvas
+```
+3. Install the necessary packages:
+```bash
+npm install
 ```
 
-Install the necessary packages:
+    
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file
 
 ```bash
-    npm install
+SERVER_HOST=
+SERVER_PORT=
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+REDIS_HOST=
+REDIS_PORT=
+ADMIN_USERNAME=
+ADMIN_PASSWORD=
+NODE_ENV=
 ```
+
+
+## Running locally
+
+1. Setup environment variables
+
+2. Navigate to root directory
+```bash
+cd drawing_canvas
+```
+3. Run this command:
+```bash
+node index.js
+```
+
 
 ### Docker Setup (MYSQL):
 
 - Ensure you have docker and docker-compose installed on your system.
-- Navigate to the 'docker' directory and run the following command to start the MYSQL Docker container:
+- Navigate to the project directory and run the following command to start the MYSQL Docker container:
 
 ```bash
     docker compose up -d
@@ -50,86 +102,6 @@ To start the docker if it's not running, run the following command:
 ```bash
   docker start CONTAINER_NAME
 ```
-
-## Config Setup:
-
-Navigate to the config file in the server directory:
-
-```bash
-    cd server/config.js
-```
-
-Here you're able to change the configuration settings to reflect the IPs of the services that are required:
-
-1. **DOMAIN**: Replace with the actual domain or IP address of your server.
-
-```javascript
-const DOMAIN = `your-server-domain-or-ip:`;
-```
-
-2. **PORT**: Replace with the actual port of server.
-
-```javascript
-const PORT = `your-port`;
-```
-
-3. **NODE_ENV**: Change from `'development'` to `'production'` ('development' utilizes SQLite and 'production' utilizes MySQL).
-
-```javascript
-const NODE_ENV = "production";
-```
-
-4. **Redis Config**: Update the Redis host to the server's Redis instance address if it's not running on the same server or if you're using a managed Redis service.
-
-```javascript
-    redisConfig: {
-        host: "redis-server-domain-or-ip",
-        port: 6379, // Keep the port the same if unchanged
-    },
-```
-
-5. **Database Config**: Update the host, user, password, and database settings to match the production database credentials and host.
-
-```javascript
-    database: {
-        host: "database-server-domain-or-ip",
-        user: "some-username",
-        password: "some-password",
-        database: "some-database-name",
-    },
-```
-
-6. **CORS**: Ensure the 'origin' value is set to the correct serve domain and port.
-
-```javascript
-cors: {
-      origin: `http://${DOMAIN}:${PORT}`, // Replace with your production server's DOMAIN and port
-  credentials: true,
-},
-```
-
-## Testing
-
-This project uses a flexible database configuration that allows easy switching between SQLite and MySQL:
-
-- Development: SQLite is used by default when `NODE_ENV` is set to 'development'
-- Production: MySQL is used when `NODE_ENV` is set to 'production'
-
-To switch between databases, simply change the `NODE_ENV` variable in `server/config.js`.
-
-I have it this way because SQLite requires no setup, making it ideal for local development and testing, but when its ready for deployment, MySQL offers better performance and scalability.
-
-1. Connect to the MySQL database using a client of your choice (e.g., MySQL Workbench, DBeaver, or the MySQL command-line client).
-
-- Host: `localhost`
-- Port: `3306`
-- Username: `root`
-- Password: `some-password`
-
-2. Verify that the `drawings_app` database and the `drawings` and `bannedSessions` tables have been created.
-
-3. Use the application to interact with the database through the provided API endpoints.
-
 ## Usage
 
 - Users can draw on the canvas using their mouse or touch device.

@@ -3,7 +3,7 @@ const sqlite = require('./sqlite');
 
 let db;
 
-if (process.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development') {
     console.log('Using SQLite database');
     db = sqlite;
 } else {
