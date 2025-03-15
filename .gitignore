@@ -1,2 +1,5 @@
-
+.env
 drawings.db
+drawings.db-wal
+drawings.db-shm
+node_modules/

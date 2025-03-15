@@ -1,71 +1,102 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // function login() {
-  //   let username = "";
-  //   let password = "";
+  socket = io.connect();
 
-  //   while (true) {
-  //     username = prompt("Enter your username:");
-  //     if (username === null || username.trim() === "") {
-  //       alert("Please enter a username to continue.");
-  //       continue;
-  //     }
+  /* Styling for the iframe canvas */
+  const iframe = document.querySelector("iframe");
 
-  //     password = prompt("Enter your password:");
-  //     if (password === null || password.trim() === "") {
-  //       alert("Please enter a password to continue.");
-  //       continue;
-  //     }
+  iframe.onload = function () {
+    const iframeDocument =
+      iframe.contentDocument || iframe.contentWindow.document;
+    // Remove padding from iframe wrapper to avoid double margins
+    iframeDocument.querySelector("div").style.padding = 0;
 
-  //     if (username === "admin" && password === "password") {
-  //       break;
+    const canvasHeight = iframeDocument.querySelector("#canvas").offsetHeight;
+    const dataTables = document.querySelector(".data-tables");
+    const clearCanvasBtn = document.querySelector("#clear-canvas").offsetHeight;
 
-  //     } else {
-  //       alert("Invalid username or password. Please try again.");
-  //     }
-  //   }
-  // }
+    const totalHeight = canvasHeight - clearCanvasBtn;
+    dataTables.style.height = `${totalHeight}px`;
+  };
 
-  // login();
+  /* Loads drawings for each canvas per session */
+  const sessionCanvases = document.querySelectorAll(".session-canvas");
 
-  //loads drawings for each canvas per session
-  function renderDrawings() {
-    const sessionCanvases = document.querySelectorAll(".session-canvas");
+  sessionCanvases.forEach((canvas) => {
+    const sessionId = canvas.getAttribute("data-session-id");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    sessionCanvases.forEach((canvas) => {
-      const sessionId = canvas.getAttribute("data-session-id");
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    /* Scales the tables canvas down in respective to the main canvas */
+    const scaleFactor = Math.min(canvas.width / 2560, canvas.height / 1440);
+    ctx.scale(scaleFactor, scaleFactor);
 
-      function drawLine(startX, startY, endX, endY, color, width) {
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-        ctx.lineCap = "round";
-        ctx.stroke();
-      }
+    // filters the drawing
+    const filteredData = drawingData.filter(
+      (data) => data.sessionId === sessionId
+    );
 
-      const scaleFactor = Math.min(canvas.width / 1920, canvas.height / 1080);
-      ctx.scale(scaleFactor, scaleFactor);
+    //Logic for redrawing for each session
+    function drawLine(startX, startY, endX, endY, color, width) {
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.stroke();
+    }
 
-      const filteredData = drawingData.filter(
-        (data) => data.sessionId === sessionId
+    filteredData.forEach((data) => {
+      drawLine(
+        data.startX,
+        data.startY,
+        data.endX,
+        data.endY,
+        data.color,
+        data.width
       );
-      filteredData.forEach((data) => {
-        drawLine(
-          data.startX,
-          data.startY,
-          data.endX,
-          data.endY,
-          data.color,
-          data.width,
-          false
-        );
-      });
     });
-  }
-  renderDrawings();
+  });
+
+  /* Carousel for Drawing Data and Banned Users table */
+  const tables = [
+    {
+      id: "drawings-data-table",
+      header: "Drawing Data",
+    },
+    {
+      id: "banned-users-table",
+      header: "Banned Users",
+    },
+  ];
+
+  let currentIdx = 0;
+
+  const header = document.getElementById("table-header");
+  const prevButton = document.querySelector(".prev");
+  const nextButton = document.querySelector(".next");
+
+  const updateTable = () => {
+    tables.forEach((table, idx) => {
+      const tableElement = document.getElementById(table.id);
+      if (idx === currentIdx) {
+        tableElement.style.display = "";
+        header.textContent = table.header;
+      } else {
+        tableElement.style.display = "none";
+      }
+    });
+  };
+
+  prevButton.addEventListener("click", () => {
+    currentIdx = (currentIdx - 1 + tables.length) % tables.length;
+    updateTable();
+  });
+
+  nextButton.addEventListener("click", () => {
+    currentIdx = (currentIdx + 1) % tables.length;
+    updateTable();
+  });
 
   //Clears Canvas of all drawings
   const clearCanvas = document.getElementById("clear-canvas");
@@ -77,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            location.reload();
+            socket.emit("trashDrawings");
           } else {
             alert("Error clearing canvas");
           }
@@ -89,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   //Deletes all drawings for a specific session
-  const deleteButtons = document.querySelectorAll(".delete-btn");
+  const deleteButtons = document.querySelectorAll("#delete-btn");
   deleteButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const sessionId = this.getAttribute("data-session-id");
@@ -104,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              location.reload();
+              socket.emit("trashDrawings");
             } else {
               alert("Error deleting drawings");
             }
@@ -116,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  const banButtons = document.querySelectorAll(".ban-btn");
+  const banButtons = document.querySelectorAll("#ban-btn");
   banButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const sessionId = this.getAttribute("data-session-id");
@@ -128,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
           .then((data) => {
             if (data.success) {
               alert("Session ID banned successfully");
-              location.reload();
+              socket.emit("trashDrawings");
             } else {
               throw new Error("Error deleting drawings");
             }
@@ -141,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  const unbanButtons = document.querySelectorAll(".unban-btn");
+  const unbanButtons = document.querySelectorAll("#unban-btn");
   unbanButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const sessionId = this.getAttribute("data-session-id");
@@ -152,7 +183,6 @@ document.addEventListener("DOMContentLoaded", function () {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              location.reload();
               alert("Session ID unbanned successfully");
             } else {
               alert("Error unbanning session ID");

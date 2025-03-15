@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect();
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
-
   const offscreenCanvas = document.getElementById("offscreenCanvas");
   const offscreenCtx = offscreenCanvas.getContext("2d");
 
@@ -11,104 +10,108 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastX = 0;
   let lastY = 0;
   let color = "#000000";
-  let strokeWidth = 5;
+  let strokeWidth = 10;
   let pencilColor = color;
   let currentTool = "pencil";
 
-  const canvasWidth = 1920;
-  const canvasHeight = 1080;
+  const canvasWidth = 2560;
+  const canvasHeight = 1440;
 
   // Set up canvas
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
-
-  offscreenCanvas.width = canvasWidth;
-  offscreenCanvas.height = canvasHeight;
+  canvas.width = offscreenCanvas.width = canvasWidth;
+  canvas.height = offscreenCanvas.height = canvasHeight;
 
   // Mouse events
   canvas.addEventListener("mousedown", startDrawing);
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", stopDrawing);
   canvas.addEventListener("mouseleave", stopDrawing);
-
   // Touch events
   canvas.addEventListener("touchstart", touchStart);
   canvas.addEventListener("touchmove", touchMove);
   canvas.addEventListener("touchend", stopDrawing);
   canvas.addEventListener("touchcancel", stopDrawing);
 
-  loadDrawings();
-
-  // Update stroke color
   document
     .getElementById("stroke-color")
-    .addEventListener("input", function () {
-      if (currentTool === "pencil") {
-        color = this.value;
-        pencilColor = color;
-      }
-    });
+    .addEventListener("input", updateStrokeColor);
+  document
+    .getElementById("trash-btn")
+    .addEventListener("click", confirmTrashDrawings);
+  document
+    .getElementById("pencil-btn")
+    .addEventListener("click", () => setActiveTool("pencil"));
+  document
+    .getElementById("eraser-btn")
+    .addEventListener("click", () => setActiveTool("eraser"));
+  document
+    .getElementById("download-btn")
+    .addEventListener("click", downloadImage);
+  document
+    .getElementById("stroke-width-slider")
+    .addEventListener("input", updateStrokeWidth);
+  document
+    .getElementById("slider-value")
+    .addEventListener("input", updateStrokeWidth);
 
-  // Deletes all of the users drawings
-  document.getElementById("trash-btn").addEventListener("click", function () {
+  loadDrawings();
+  setActiveTool("pencil");
+
+  function updateStrokeColor(e) {
+    if (currentTool === "pencil") {
+      color = pencilColor = e.target.value;
+    }
+  }
+
+  function confirmTrashDrawings() {
     if (confirm("Are you sure you want to clear all of your drawings?")) {
       socket.emit("trashDrawings");
     }
-  });
+  }
 
-  //Pencil Event Listener
-  const pencilButton = document.getElementById("pencil-btn");
-  pencilButton.addEventListener("click", function () {
-    setActiveTool("pencil");
-  });
+  function setActiveTool(tool) {
+    const pencilButton = document.getElementById("pencil-btn");
+    const eraserButton = document.getElementById("eraser-btn");
 
-  //Eraser event listener
-  const eraserButton = document.getElementById("eraser-btn");
-  eraserButton.addEventListener("click", function () {
-    setActiveTool("eraser");
-  });
+    switch (tool) {
+      case "pencil":
+        pencilButton.classList.add("active");
+        eraserButton.classList.remove("active");
+        color = pencilColor;
+        break;
+      case "eraser":
+        eraserButton.classList.add("active");
+        pencilButton.classList.remove("active");
+        color = "white";
+        break;
+    }
+    currentTool = tool;
+  }
 
-  // Save image button
-  document
-    .getElementById("download-btn")
-    .addEventListener("click", function () {
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = image;
-      link.download = "drawing.png";
+  function downloadImage() {
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = canvasWidth;
+    tempCanvas.height = canvasHeight;
+    const tempCtx = tempCanvas.getContext("2d");
 
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = canvasWidth;
-      tempCanvas.height = canvasHeight;
-      const tempCtx = tempCanvas.getContext("2d");
+    tempCtx.fillStyle = "#ffffff";
+    tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+    tempCtx.drawImage(canvas, 0, 0);
 
-      tempCtx.fillStyle = "#ffffff";
-      tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+    const link = document.createElement("a");
+    link.href = tempCanvas.toDataURL("image/png");
+    link.download = "drawing.png";
+    link.click();
+  }
 
-      tempCtx.drawImage(canvas, 0, 0);
+  function updateStrokeWidth(e) {
+    const value = e.target.value;
+    strokeWidth = value;
+    document.getElementById("stroke-width-slider").value = value;
+    document.getElementById("slider-value").value = value;
+    ctx.lineWidth = value;
+  }
 
-      const tempImage = tempCanvas.toDataURL("image/png");
-
-      link.href = tempImage;
-
-      link.click();
-    });
-
-  // Update stroke width based on slider value
-  document
-    .getElementById("stroke-width-slider")
-    .addEventListener("input", function () {
-      updateValues(this.value);
-    });
-
-  // Update stroke width based on input value
-  document
-    .getElementById("slider-value")
-    .addEventListener("input", function () {
-      updateValues(this.value);
-    });
-
-  //gets the coordinates of the mouse in relation to the canvas
   function getCoordinates(e) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -126,34 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
         y: (touch.clientY - rect.top) * scaleY,
       };
     }
-  }
-
-  // sets active tool with color and "active" class
-  function setActiveTool(tool) {
-    switch (tool) {
-      case "pencil":
-        pencilButton.classList.add("active");
-        eraserButton.classList.remove("active");
-        color = pencilColor;
-        break;
-      case "eraser":
-        eraserButton.classList.add("active");
-        pencilButton.classList.remove("active");
-        color = "white";
-        break;
-    }
-    currentTool = tool;
-  }
-
-  // Sets default active tool as pencil
-  setActiveTool("pencil");
-
-  // Update stroke width
-  function updateValues(value) {
-    strokeWidth = value;
-    document.getElementById("stroke-width-slider").value = value;
-    document.getElementById("slider-value").value = value;
-    ctx.lineWidth = value;
   }
 
   function startDrawing(e) {

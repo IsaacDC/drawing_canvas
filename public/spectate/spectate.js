@@ -7,13 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const offscreenCanvas = document.getElementById("offscreenCanvas");
   const offscreenCtx = offscreenCanvas.getContext("2d");
 
-  const canvasWidth = 1920;
-  const canvasHeight = 1080;
+  const canvasWidth = 2560;
+  const canvasHeight = 1440;
 
   // Set up canvas
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
-  
   offscreenCanvas.width = canvasWidth;
   offscreenCanvas.height = canvasHeight;
 
