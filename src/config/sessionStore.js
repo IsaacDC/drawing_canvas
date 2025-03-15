@@ -15,22 +15,17 @@ redisClient.on("connect", function () {
 });
 
 const sessionMiddleware = session({
-  secret: "secret",
+  secret: process.env.REDIS_SECRET,
   store: new RedisStore({ client: redisClient }),
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV,
-    sameSite: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : true,
+    httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   },
-  genid: (req) => {
-    if (req.sessionID) {
-      return req.sessionID;
-    }
-    const newId = uuidv4();
-    return newId;
-  },
+  genid: (req) => uuidv4(),
 });
 
 const wrap = (expressMiddleware) => (socket, next) =>
