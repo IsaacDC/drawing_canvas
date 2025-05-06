@@ -7,30 +7,37 @@ const redisClient = new Redis({
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT,
 });
+
 redisClient.on("error", function (err) {
-  console.log("Could not establish a connection to Redis" + err);
+  console.error("Redis connection error:", err);
 });
+
 redisClient.on("connect", function () {
-  console.log("Connected to Redis");
+  console.log("Successfully connected to Redis");
 });
 
 const sessionMiddleware = session({
-  secret: "secret",
-  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+  store: new RedisStore({ 
+    client: redisClient,
+    prefix: 'session:',
+    ttl: 30 * 24 * 60 * 60,
+  }),
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV,
-    sameSite: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    httpOnly: true,
   },
   genid: (req) => {
     if (req.sessionID) {
       return req.sessionID;
     }
-    const newId = uuidv4();
-    return newId;
+    return uuidv4();
   },
+  rolling: true,
 });
 
 const wrap = (expressMiddleware) => (socket, next) =>
